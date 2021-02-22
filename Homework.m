@@ -28,3 +28,27 @@ angle_n = 1;
 [~, col] = find(trial(trial_n,angle_n).spikes(:,:) > 0);
 histogram(col, length(trial(trial_n,angle_n).spikes(1,:)))
 
+%% Hand Trajectory
+angles = trial(1, :).handPos;
+figure(2)
+hold on
+for i=1:size(trial,2)
+    plot3(trial(1, i).handPos(1, :), trial(1, i).handPos(2, :), trial(1, i).handPos(3, :))
+end
+view(3)
+xlabel('X')
+ylabel('Y')
+zlabel('Z')
+grid on
+
+figure(3)
+hold on
+for i=1:size(trial,2)
+    plot(trial(1, i).handPos(1, :), trial(1, i).handPos(2, :))
+end
+xlabel('X')
+ylabel('Y')
+zlabel('Z')
+grid on
+
+
