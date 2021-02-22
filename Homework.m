@@ -20,3 +20,9 @@ for i = 1:size(trial, 1)
 end
 %row = ones(size(pos))*[1:size(pos, 1)]
 scatter(col, row, 2, 'filled')
+
+%% PSTH
+trial_n = 1;
+angle_n = 1;
+[~, col] = find(trial(trial_n,angle_n).spikes(:,:) > 0);
+histogram(col, length(trial(trial_n,angle_n).spikes(1,:)))
