@@ -34,3 +34,18 @@ histogram(col, bin_n)
 hold on
 [f,xi] = ksdensity(col); %calculates probability distribution
 plot(xi,f*normalization_factor, 'LineWidth', 2)
+
+%% Tuning curve
+unit_n = 1;
+average_freq = zeros(1, size(trial, 2));
+angles = [30 70 110 150 190 230 310 350].*(pi/180);
+
+for angle_n = 1:size(trial, 2)
+    for i = 1:size(trial, 1)
+        average_freq(1, angle_n) = average_freq(1, angle_n) + mean(trial(i,angle_n).spikes(unit_n,:));
+    end
+end
+average_freq = average_freq/i;
+bar(average_freq)
+
+polarplot([angles;angles], [zeros(size(average_freq));average_freq], 'LineWidth', 3);
