@@ -61,16 +61,30 @@ zlabel('Z')
 grid on
 
 %% Tuning curve
-unit_n = 1;
+unit_n = 8;
 average_freq = zeros(1, size(trial, 2));
-angles = [30 70 110 150 190 230 310 350].*(pi/180);
+std = zeros(1, size(trial, 2));
+angles = [30 70 110 150 190 230 310 350].*(pi/180); %angles corresponding to the 8
 
 for angle_n = 1:size(trial, 2)
     for i = 1:size(trial, 1)
-        average_freq(1, angle_n) = average_freq(1, angle_n) + mean(trial(i,angle_n).spikes(unit_n,:));
+        temp = average_freq(1, angle_n);
+        x_new = mean(trial(i,angle_n).spikes(unit_n,:));
+        average_freq(1, angle_n) = average_freq(1, angle_n) + x_new;
+%         std(1, angle_n) = 1/i*((i-1)*std(1, angle_n) + (i-1)*(i-2)*(average_freq(1, angle_n)-temp)^2); %running sample variance
+        std(1, angle_n) = std(1, angle_n) + (x_new-temp)*(x_new-average_freq(1, angle_n)); %running sample intrmediate variance
     end
 end
-average_freq = average_freq/i;
-bar(average_freq)
+average_freq = average_freq/i; %averaging
+% std = sqrt(std); %standard deviation from variance
+std = sqrt(std/i); %standard deviation from intermediate variance
 
+%vertical bars representing the firing frequency at the different angles
+figure(3)
+hold on
+bar(average_freq)
+errorbar(1:8, average_freq, std/2, std/2)
+
+%firing frequency in polar coordinates
+figure(2)
 polarplot([angles;angles], [zeros(size(average_freq));average_freq], 'LineWidth', 3);
