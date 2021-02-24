@@ -61,7 +61,8 @@ zlabel('Z')
 grid on
 
 %% Tuning curve
-unit_n = 1;
+hold off;
+unit_n = 76;
 average_freq = zeros(1, size(trial, 2));
 angles = [30 70 110 150 190 230 310 350].*(pi/180);
 
@@ -73,4 +74,5 @@ end
 average_freq = average_freq/i;
 bar(average_freq)
 
+figure(100)
 polarplot([angles;angles], [zeros(size(average_freq));average_freq], 'LineWidth', 3);
