@@ -91,3 +91,38 @@ errorbar(1:8, average_freq, std/2, std/2)
 %firing frequency in polar coordinates
 figure()
 polarplot([angles;angles], [zeros(size(average_freq));average_freq], 'LineWidth', 3);
+
+%% averaged signal for each angle
+min_length = 1*10^5;
+
+for angle_n = 1:size(trial, 2)
+    for i = 1:size(trial, 1)
+        temp_length = size(trial(i,angle_n).spikes(1,:), 2);
+        if temp_length < min_length
+            min_length = temp_length;
+        end
+    end
+end
+
+average_spike_train = zeros(size(trial, 2), min_length);
+
+for angle_n = 1:size(trial, 2)
+    for i = 1:size(trial, 1)
+        average_spike_train(angle_n, :) = average_spike_train(1, angle_n) + mean(trial(i,angle_n).spikes(:,1:min_length), 1);
+    end
+end
+average_spike_train = average_spike_train/i;
+
+for i = 1:size(trial, 2)
+    figure(10)
+    subplot(4,2,i)
+    plot(average_spike_train(i,:));
+    
+    figure(11)
+    subplot(4,2,i)
+    plot(smooth(smooth(smooth(average_spike_train(i,:)))));
+end
+
+
+
+
