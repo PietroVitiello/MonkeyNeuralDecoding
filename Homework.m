@@ -37,6 +37,55 @@ hold on
 [f,xi] = ksdensity(col); %calculates probability distribution
 plot(xi,f*normalization_factor, 'LineWidth', 2)
 
+%% PSTH per neuron
+min_length = 1*10^5;
+for angle_n = 1:size(trial, 2)
+    for i = 1:size(trial, 1)
+        temp_length = size(trial(i,angle_n).spikes(1,:), 2);
+        if temp_length < min_length
+            min_length = temp_length;
+        end
+    end
+end
+
+% neurons = 1:14:size(trial(1, 1).spikes, 1);
+neurons = 1:1:5;
+overall_angles = zeros(length(neurons), min_length, size(trial, 2));
+for angle_n=1:size(trial, 2)
+    for neuron_n = 1:length(neurons)
+        single_neuron = zeros(size(trial, 1), min_length);
+        for trial_n=1:size(trial, 1)
+            signal = trial(trial_n, angle_n).spikes(neurons(neuron_n), :);
+            single_neuron(trial_n, :) = signal(1:min_length);
+        end
+        overall_angles(neuron_n, :, angle_n) = mean(single_neuron);
+    end
+end
+
+max_ = -Inf;
+for neuron_n=1:size(overall_angles,1)
+    for angle_n=1:size(overall_angles,3)
+        for time_point=1:size(overall_angles,2)
+            if overall_angles(neuron_n, time_point, angle_n)> max_
+                max_ = overall_angles(neuron_n, time_point, angle_n);
+            end
+        end
+    end
+end
+
+c = 1;
+for i=1:length(neurons)
+    for j=1:size(trial, 2)
+        figure(100)
+        hold on;
+        subplot(length(neurons),size(trial, 2), c)
+        plot(1:min_length, smoothdata(smoothdata(overall_angles(i, :, j))));
+        ylim([0 max_]);
+        xline(300, '--r')
+        c = c + 1;
+    end
+end
+
 %% Hand Trajectory
 angles = trial(1, :).handPos;
 figure()
