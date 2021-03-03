@@ -187,7 +187,7 @@ for i = 1:size(trial, 2)
     
     figure(11)
     subplot(4,2,i)
-    plot(smooth(smooth(smooth(average_spike_train(i,:)))));
+    %plot(smooth(smooth(smooth(average_spike_train(i,:)))));
 end
 
 %% Hand position delta
