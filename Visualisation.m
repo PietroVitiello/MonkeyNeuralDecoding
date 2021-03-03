@@ -37,7 +37,7 @@ hold on
 [f,xi] = ksdensity(col); %calculates probability distribution
 plot(xi,f*normalization_factor, 'LineWidth', 2)
 
-%% PSTH per neuron
+%% Raster per neuron across angles
 min_length = 1*10^5;
 for angle_n = 1:size(trial, 2)
     for i = 1:size(trial, 1)
@@ -84,6 +84,24 @@ for i=1:length(neurons)
         xline(300, '--r')
         c = c + 1;
     end
+end
+
+%% Linear fitting of labels
+figure()
+params_ = zeros(size(trial,2), 3);
+for i=1:size(trial,2)
+    temp = [];
+    for j=1:size(trial,1)
+        temp = [temp trial(j,i).handPos];
+    end
+    p = polyfit(temp(1, :), temp(2, :), 1);
+    params_(i, :) = p;
+    subplot(2,4,i)
+    hold on;
+    x = linspace(-20,100,1000);
+    y = polyval(p, x);
+    plot(x,y)
+    scatter(temp(1, :), temp(2, :))
 end
 
 %% Hand Trajectory
