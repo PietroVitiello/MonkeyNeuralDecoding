@@ -172,6 +172,7 @@ for i = 1:size(trial, 2)
     plot(smooth(smooth(smooth(average_spike_train(i,:)))));
 end
 
+ciao = 1;
 %% Hand position delta
 min_length = 1*10^5;
 for angle_n = 1:size(trial, 2)
