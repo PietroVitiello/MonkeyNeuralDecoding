@@ -204,6 +204,21 @@ for i = 1:size(trial, 2)
     plot(average_deltaHand(i,:));
 end
 
+%% Highest response per angle
+pre_motor_window = 320;
+
+average_spike_trains = zeros(size(trial(1,1).spikes, 1), size(trial, 2));
+
+for angle_n = 1:size(trial, 2)
+    for i = 1:size(trial, 1)
+        average_spike_trains(:,angle_n) = average_spike_trains(:,angle_n) + mean(trial(i, angle_n).spikes(:, 1:pre_motor_window), 2);
+    end
+end
+
+%active neurons is a matrix, each column represents one angle and
+%the neurons are ordered from the highest to lowest
+[~, active_neurons] = sort(average_spike_trains, 'descend');
+
 
 
 
