@@ -5,12 +5,12 @@ classdef Processing
     end
     
     methods
-        function active_neurons = mostActive(trial, lower_bound, upper_bound)
+        function active_neurons = mostActive(obj, trial, n, lower_bound, upper_bound)
             
-            if nargin < 3
+            if nargin < 5
                 lower_bound = 1;
             end
-            if nargin < 2
+            if nargin < 4
                 upper_bound = 320;
             end
             
@@ -26,9 +26,29 @@ classdef Processing
 
             %active neurons is a matrix, each column represents one angle and
             %the neurons are ordered from the highest to lowest
-            [~, active_neurons] = sort(average_spike_trains, 'descend');
+            [~, all_active_neurons] = sort(average_spike_trains, 'descend');
+            
+            active_neurons = [];
+            col = 1;
+            row = 1;
+            
+            while length(active_neurons) < n*size(all_active_neurons, 2)
+                temp = all_active_neurons(row, col);
+                
+                if isempty(find(active_neurons == temp, 1))
+                    active_neurons = [active_neurons temp];
+                    
+                    if length(active_neurons) == col*n
+                        col = col + 1;
+                        row = 0;
+                    end
+                end
+                
+                row = row + 1;
+                
+            end 
         end
-        
+
         function dataset = create_dataset(trial, active_neurons)
             dataset = zeros(size(trial,1)*size(trial,2), length(active_neurons)+1);
             length_premotor = 320;
