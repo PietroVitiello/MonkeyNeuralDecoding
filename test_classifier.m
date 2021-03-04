@@ -17,3 +17,6 @@ test_labels = labels(1:80, :);
 
 a_classifier = AngleClassifier();
 classified_data = a_classifier.k_nn(training_samples, training_labels, test_samples, 28);
+
+correct_angles = classified_data == test_labels.';
+n_correct_angles = sum(correct_angles); %Number of correctly classified trials
