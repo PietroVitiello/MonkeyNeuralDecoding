@@ -77,9 +77,7 @@ classdef Processing
                 
             end 
         end
-        
-        
-        
+
         function [samples, labels] = create_dataset(~, trial, active_neurons)
             dataset = zeros(size(trial,1)*size(trial,2), length(active_neurons)+1);
             length_premotor = 320;
