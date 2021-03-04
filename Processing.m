@@ -16,7 +16,25 @@ classdef Processing
             end
         end
         
-        function active_neurons = mostActive(obj, trial, n, lower_bound, upper_bound)
+        function active_neurons = mostActive(~, trial, n, lower_bound, upper_bound)
+            %{
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            The purpose of this function is to create a list of neurons
+            that have a high activity in the first 320ms to use for the 
+            angle classifier
+            
+            -input
+            trial: is the data as a matrix of structs
+            n: number of most active neurons taken for each angle without
+               repetition
+            lower_bound: lower bound of the sample window to consider
+            upper_bound: upper bound of the sample window to consider
+            
+            -output
+            active_neurons: 1 x n*(number of angles) list of neurons
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %}
             
             if nargin < 5
                 lower_bound = 1;
@@ -59,7 +77,9 @@ classdef Processing
                 
             end 
         end
-
+        
+        
+        
         function [samples, labels] = create_dataset(trial, active_neurons)
             dataset = zeros(size(trial,1)*size(trial,2), length(active_neurons)+1);
             length_premotor = 320;
@@ -80,5 +100,4 @@ classdef Processing
             labels = rand_d(:, length(active_neurons)+1);
         end
     end
-    
 end
