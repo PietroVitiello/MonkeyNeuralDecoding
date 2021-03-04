@@ -28,6 +28,23 @@ classdef Processing
             %the neurons are ordered from the highest to lowest
             [~, active_neurons] = sort(average_spike_trains, 'descend');
         end
+        
+        function dataset = create_dataset(trial, active_neurons)
+            dataset = zeros(size(trial,1)*size(trial,2), length(active_neurons)+1);
+            length_premotor = 320;
+            traj_count = 0;
+            for angle_n = 1:size(trial,2)
+                for trial_n = 1:size(trial, 1)
+                    traj_count = traj_count + 1;
+                    temp = zeros(1, length(active_neurons));
+                    for neuron_n = 1:length(active_neurons)
+                        temp(neuron_n) = sum(trial(trial_n, angle_n).spikes(active_neurons(neuron_n), 1:length_premotor));
+                        temp(length(active_neurons)+1) = angle_n;
+                    end
+                dataset(traj_count, :) = temp;
+                end
+            end
+        end
     end
     
 end
