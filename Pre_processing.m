@@ -54,4 +54,3 @@ trials_ = 2:8:size(array_1d_neurons,1);
 for i=1:length(trials_)
     plot(array_1d_neurons(trials_(1), :) - array_1d_neurons(trials_(i), :))
 end
-
