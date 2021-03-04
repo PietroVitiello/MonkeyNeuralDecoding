@@ -187,7 +187,7 @@ for i = 1:size(trial, 2)
     
     figure(11)
     subplot(4,2,i)
-    plot(smooth(smooth(smooth(average_spike_train(i,:)))));
+    %plot(smooth(smooth(smooth(average_spike_train(i,:)))));
 end
 
 %% Hand position delta
@@ -222,7 +222,67 @@ for i = 1:size(trial, 2)
     plot(average_deltaHand(i,:));
 end
 
+%% PSTH across angles
+dummy = 10000;
+for n_unit_i = 1:98
+    for angle_i = 1:size(trial, 2)
+        for trial_i = 1:size(trial, 1)
+            n_bins = length(trial(trial_i, angle_i).spikes(n_unit_i, :));
+            if n_bins < dummy
+                dummy = n_bins;
+            end
+        end
+    end
+end
 
+%%%%%%%%%%%%%%%%%%SUM ACROSS ANGLES%%%%%%%%%%%%%%%%
+figure
+count = 0;
+n_neurons = 98;
+step = 25;
+
+useful_neurons = 1:98;
+
+for n_unit_i = 17:32 %Choose neuron units to plot
+    t = [];
+    for angle_i = 1:size(trial, 2)
+        for trial_i = 1:size(trial, 1)
+            [~, t_i] = find(trial(trial_i, angle_i).spikes(n_unit_i, 1:dummy) > 0);
+            t = [t t_i];
+        end     
+    end
+    subplot(4, 4, count+1)
+    hold on
+    histogram(t, dummy)
+    xline(300, 'color', 'b');
+    xlim([0 dummy])
+    ylim([0 100])
+    [F, xi] = ksdensity(t);
+    plot(xi, F*length(t), 'LineWidth', 2)
+    smooth = F*length(t);
+    if (max(smooth) < 15)
+        useful_neurons(1, n_unit_i) = 0;
+    end
+    
+    count = count + 1;
+end
+
+useless_neurons = find(useful_neurons == 0);
+
+%% Highest response per angle
+pre_motor_window = 320;
+
+average_spike_trains = zeros(size(trial(1,1).spikes, 1), size(trial, 2));
+
+for angle_n = 1:size(trial, 2)
+    for i = 1:size(trial, 1)
+        average_spike_trains(:,angle_n) = average_spike_trains(:,angle_n) + mean(trial(i, angle_n).spikes(:, 1:pre_motor_window), 2);
+    end
+end
+
+%active neurons is a matrix, each column represents one angle and
+%the neurons are ordered from the highest to lowest
+[~, active_neurons] = sort(average_spike_trains, 'descend');
 
 
 
