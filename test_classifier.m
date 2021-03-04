@@ -2,6 +2,7 @@ clc
 clear all
 load monkeydata_training
 processor = Processing();
+a_classifier = AngleClassifier();
 
 %% KNN
 silent_neuron = [8 10 11 38 49 52 73 74 76];
@@ -25,8 +26,7 @@ for i=1:runs
         idxs = find(test_labels==angle);
         angle_distribution(i, angle) = (length(idxs))/(size(test_labels,1));
     end
-
-    a_classifier = AngleClassifier();
+    
     neighbours = 1:40;
 
     [train_metrics, test_metrics] = a_classifier.knn_classifier(training_samples, training_labels, test_samples, test_labels, 28);
@@ -51,3 +51,7 @@ active_neurons = processor.mostActive(clean_trial, 4);
 
 [train_mx, test_mx] = processor.data_as_matrix(clean_trial, active_neurons, 80);
 
+[estimated_angles, true_angles] = a_classifier.likelihood(train_mx, test_mx);
+
+correct_angles = estimated_angles == true_angles;
+sum(correct_angles)/160*100

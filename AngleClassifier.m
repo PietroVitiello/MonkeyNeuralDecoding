@@ -64,12 +64,12 @@ classdef AngleClassifier
             for i = 1:n_test_trials
                 for n = 1:n_neurons
                     for a = 1:n_angles
-                        like_a(i, n, a) = normpdf(test_data(i, n), par(n,a,1), apr(n,a,2));
+                        like_a(i, n, a) = normpdf(test_data(i, n), par(n,a,1), par(n,a,2));
                     end
                 end
                 likelihood = prod(like_a(i,:,:));
                 [~, estimated_angles(i)] = max(likelihood);
-                true_angles(i) = floor((i-1) / size(test_matrix, 1));
+                true_angles(i) = floor((i-1) / size(test_matrix, 1)) + 1;
             end
         end
         
