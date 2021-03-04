@@ -1,10 +1,21 @@
 classdef Processing
     
     properties
-        
+      
     end
     
     methods
+        function trial = Processing(trial, silent_neurons)
+            for angle_n = 1:size(trial, 2)
+                for trial_n = 1:size(trial, 1)
+                    for neuron_n = 1:length(silent_neurons)
+                        trial(trial_n, angle_n).spikes(silent_neurons(neuron_n), :) = [];
+                        trial(trial_n, angle_n).handPos(silent_neurons(neuron_n), :) = [];
+                    end
+                end
+            end
+        end
+        
         function active_neurons = mostActive(obj, trial, n, lower_bound, upper_bound)
             
             if nargin < 5
