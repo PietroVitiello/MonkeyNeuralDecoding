@@ -65,8 +65,8 @@ classdef Processing
                 end
             end
             rand_d = dataset(randperm(size(dataset, 1)), :);
-            samples = rand_d(:, 1:active_neurons);
-            labels = rand_d(:, active_neurons:active_neurons+1);
+            samples = rand_d(:, 1:length(active_neurons));
+            labels = rand_d(:, length(active_neurons)+1);
         end
     end
     
