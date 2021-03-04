@@ -5,13 +5,12 @@ classdef Processing
     end
     
     methods
-        function active_neurons = mostActive(trial, n, lower_bound, upper_bound)
-            nargin
+        function active_neurons = mostActive(obj, trial, n, lower_bound, upper_bound)
             
-            if nargin < 4
+            if nargin < 5
                 lower_bound = 1;
             end
-            if nargin < 3
+            if nargin < 4
                 upper_bound = 320;
             end
             
@@ -41,12 +40,12 @@ classdef Processing
                     
                     if length(active_neurons) == col*n
                         col = col + 1;
-                        row = 1;
-                    else
-                        row = row + 1;
+                        row = 0;
                     end
-                    
-                end   
+                end
+                
+                row = row + 1;
+                
             end 
         end
         

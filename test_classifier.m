@@ -4,4 +4,4 @@ load monkeydata_training
 
 processor = Processing();
 
-active_neurons = processor.mostActive(trial, 4)
+active_neurons = processor.mostActive(trial, 4);
