@@ -66,10 +66,10 @@ classdef Processing
                 
             end 
         end
-
         
         
-        function dataset = create_dataset(trial, active_neurons)
+        
+        function [samples, labels] = create_dataset(trial, active_neurons)
             dataset = zeros(size(trial,1)*size(trial,2), length(active_neurons)+1);
             length_premotor = 320;
             traj_count = 0;
@@ -84,6 +84,9 @@ classdef Processing
                 dataset(traj_count, :) = temp;
                 end
             end
+            rand_d = dataset(randperm(size(dataset, 1)), :);
+            samples = rand_d(:, 1:length(active_neurons));
+            labels = rand_d(:, length(active_neurons)+1);
         end
         
         
