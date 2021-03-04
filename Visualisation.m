@@ -283,11 +283,3 @@ end
 %active neurons is a matrix, each column represents one angle and
 %the neurons are ordered from the highest to lowest
 [~, active_neurons] = sort(average_spike_trains, 'descend');
-
-
-
-
-
-
-
-
