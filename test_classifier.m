@@ -1,9 +1,10 @@
 clc
 clear all
 load monkeydata_training
-%% 
-silent_neuron = [8 10 11 38 49 52 73 74 76];
 processor = Processing();
+
+%% KNN
+silent_neuron = [8 10 11 38 49 52 73 74 76];
 clean_trial = processor.clean_dataset(trial, silent_neuron);
 
 active_neurons = processor.mostActive(clean_trial, 4);
@@ -20,3 +21,11 @@ classified_data = a_classifier.k_nn(training_samples, training_labels, test_samp
 
 correct_angles = classified_data == test_labels.';
 n_correct_angles = sum(correct_angles); %Number of correctly classified trials
+
+%% MLE
+silent_neuron = [8 10 11 38 49 52 73 74 76];
+clean_trial = processor.clean_dataset(trial, silent_neuron);
+active_neurons = processor.mostActive(clean_trial, 4);
+
+[train_mx, test_mx] = processor.data_as_matrix(clean_trial, active_neurons, 80);
+
