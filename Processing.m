@@ -114,7 +114,6 @@ classdef Processing
             
             n_trials = size(trial_struct, 1);
             n_angles = size(trial_struct, 2);
-            tot_neurons = size(trial_struct(1,1).spikes, 1);
             n_neurons = length(active_neurons);
             
             mx = zeros(n_trials, n_angles, n_neurons, n_ms);
@@ -124,7 +123,7 @@ classdef Processing
                 end
             end
             
-            n_train_trials = n_trials*training_percentage / 100;
+            n_train_trials = round(n_trials*training_percentage / 100);
             train_mx = zeros(n_train_trials, n_angles, n_neurons, n_ms);
             test_mx = zeros(n_trials-n_train_trials, n_angles, n_neurons, n_ms);
             for angle = 1:n_angles
@@ -132,6 +131,18 @@ classdef Processing
                 train_mx(:,angle,:,:) = mx(rand_trials(1:n_train_trials), angle, :, :);
                 test_mx(:,angle,:,:) = mx(rand_trials(n_train_trials+1:end), angle, :, :);
             end
+        end
+        
+        
+        function cov_mx = covariance(~, data_mx, angle)
+            
+            n_neurons = size(data_mx, 3);
+            
+            mx = sum(data_mx, 4);
+            mx = reshape(mx(:,angle,:), [], n_neurons);
+            
+            cov_mx = cov(mx);
+            
         end
         
     end

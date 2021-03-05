@@ -36,9 +36,10 @@ classdef AngleClassifier
             test_metrics = (sum(predictions))/length(predictions);
         end
         
+        
         function [estimated_angles, true_angles] = likelihood(~, train_matrix, test_matrix)
             
-            % training
+            %%% FITTING %%%
             [~, n_angles, n_neurons, ~] = size(train_matrix);
             
             train_data = sum(train_matrix, 4);
@@ -46,11 +47,11 @@ classdef AngleClassifier
             
             for neuron = 1:n_neurons
                 for angle = 1:n_angles
-                    [par(neuron, angle, :), ~] = mle(train_data(:, angle, neuron));
+                    par(neuron, angle, :) = mle(train_data(:, angle, neuron));
                 end
             end
             
-            % testing
+            %%% TESTING %%%
             n_test_trials = size(test_matrix, 1)*n_angles;
             
             test_data = sum(test_matrix, 4);
@@ -68,6 +69,59 @@ classdef AngleClassifier
                     end
                 end
                 likelihood = prod(like_a(i,:,:));
+                [~, estimated_angles(i)] = max(likelihood);
+                true_angles(i) = floor((i-1) / size(test_matrix, 1)) + 1;
+            end
+        end
+        
+        
+        function [estimated_angles, true_angles] = multidimensional_mle(~, train_matrix, test_matrix)
+            
+            %%% FITTING %%%
+            d = size(train_matrix, 3);
+            n_angles = size(train_matrix, 2);
+            
+            train_data = sum(train_matrix, 4);
+            train_data = reshape(train_data, [], d, n_angles);
+            
+            mu_ = mean(train_data, 1);
+            size(mu_);
+            %put dimesnion test
+
+            sigma_inv_ = zeros(d, d, n_angles);
+            scalar_ = zeros(n_angles, 1);
+            for angle = 1:n_angles
+                sigma = cov(train_data(:,:,angle))
+                %add error message if not invertible?
+                sigma_inv_(:,:,angle) = inv(sigma);
+                
+                scalar_(angle) = 1/sqrt(((2*pi)^d)*det(sigma));
+            end
+            
+            %%% TESTING %%%
+            n_test_trials = size(test_matrix, 1)*n_angles;
+            
+            test_data = sum(test_matrix, 4);
+            test_data = reshape(test_data, [n_test_trials, d]);
+            
+            likelihood = zeros(n_angles, 1);
+            estimated_angles = zeros(n_test_trials, 1);
+            true_angles = zeros(n_test_trials, 1);
+            
+            for i = 1:n_test_trials
+                for a = 1:n_angles
+                    
+                    x = test_data(i, :);
+                    
+                    mu = mu_(1,:,a);
+                    sigma_inv = sigma_inv_(:,:,a);
+                    scalar = scalar_(a);
+                    
+                    e = exp((-1/2)*dot(((x-mu)*sigma_inv), (x-mu)'));
+                    
+                    likelihood(a) = scalar * e;
+                    
+                end
                 [~, estimated_angles(i)] = max(likelihood);
                 true_angles(i) = floor((i-1) / size(test_matrix, 1)) + 1;
             end
