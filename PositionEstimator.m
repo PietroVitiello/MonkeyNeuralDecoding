@@ -4,9 +4,16 @@ classdef PositionEstimator
         
     end
     
-    
-    
     methods
+        
+        function [x_estim, P_estim] = update(~, A, x_prev, H, Q, R, P_prev, obs)
+            x_pred = A*x_prev;
+            P_pred = A*P_prev*A' + Q;
+            
+            K_gain = P_pred*H'*(inv(H*P_pred*H' + R));
+            x_estim = x_pred + K_gain*(obs - H*x_pred);
+            P_estim = (eye(size(x_prev, 1), size(x_prev, 1)) - K_gain*H)*P_pred;
+        end
         
         function A = calculateA(x, M)
             %{
@@ -69,7 +76,5 @@ classdef PositionEstimator
             end
             Q = (1/size(labels, 2))*(c1 - H*c2);
         end
-        
     end
-    
 end
