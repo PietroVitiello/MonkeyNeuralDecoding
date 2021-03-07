@@ -38,16 +38,28 @@ classdef PositionEstimator
             
         end
         
-        function W = calculateW()
-            
+        function W = calculateW(labels, A)
+            c1 = 0;
+            c2 = 0;
+            for k = 2:size(labels, 2)
+                c1 = c1 + (labels(:,k)*labels(:,k)');
+                c2 = c2 + (labels(:,k-1)*labels(:,k)');
+            end
+            W = (1/size(labels, 2)-1)*(c1 - A*c2);
         end
         
         function H = calculateH()
             
         end
         
-        function Q = calculateQ()
-            
+        function Q = calculateQ(samples, labels, H)
+            c1 = 0;
+            c2 = 0;
+            for k = 2:size(labels, 2)
+                c1 = c1 + (samples(:,k)*samples(:,k)');
+                c2 = c2 + (labels(:,k)*samples(:,k)');
+            end
+            Q = (1/size(labels, 2))*(c1 - H*c2);
         end
         
     end
