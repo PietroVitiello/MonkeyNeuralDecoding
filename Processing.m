@@ -134,6 +134,22 @@ classdef Processing
         end
         
         
+        function mx = switchDim(~, input)
+            
+            [d1, d2, d3] = size(input);
+            mx = zeros(d1, d3, d2);
+
+            for i = 1:d1
+                for j = 1:d3
+                    for k = 1:d2
+                        mx(i,j,k) = input(i,k,j);
+                    end
+                end
+            end
+            
+        end
+        
+        
         function cov_mx = covariance(~, data_mx, angle)
             
             n_neurons = size(data_mx, 3);

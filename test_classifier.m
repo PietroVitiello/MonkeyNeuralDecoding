@@ -59,7 +59,7 @@ accuracy = sum(correct_angles)/length(true_angles)*100
 %% Covariance
 silent_neuron = [8 10 11 38 49 52 73 74 76];
 clean_trial = processor.clean_dataset(trial, silent_neuron);
-active_neurons = processor.mostActive(clean_trial, 4);
+active_neurons = processor.mostActive(clean_trial, 7);
 
 [train_mx, ~] = processor.data_as_matrix(clean_trial, active_neurons, 80);
 

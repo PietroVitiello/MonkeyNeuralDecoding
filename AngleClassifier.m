@@ -77,21 +77,22 @@ classdef AngleClassifier
         
         function [estimated_angles, true_angles] = multidimensional_mle(~, train_matrix, test_matrix)
             
+            processor = Processing();
+            
             %%% FITTING %%%
             d = size(train_matrix, 3);
             n_angles = size(train_matrix, 2);
             
             train_data = sum(train_matrix, 4);
-            train_data = reshape(train_data, [], d, n_angles);
+            train_data = processor.switchDim(train_data);
             
             mu_ = mean(train_data, 1);
             size(mu_);
-            %put dimesnion test
 
             sigma_inv_ = zeros(d, d, n_angles);
             scalar_ = zeros(n_angles, 1);
             for angle = 1:n_angles
-                sigma = cov(train_data(:,:,angle))
+                sigma = cov(train_data(:,:,angle));
                 %add error message if not invertible?
                 sigma_inv_(:,:,angle) = inv(sigma);
                 
@@ -112,12 +113,13 @@ classdef AngleClassifier
                 for a = 1:n_angles
                     
                     x = test_data(i, :);
+%                     x = mu_(1,:,a);
                     
                     mu = mu_(1,:,a);
                     sigma_inv = sigma_inv_(:,:,a);
                     scalar = scalar_(a);
                     
-                    e = exp((-1/2)*dot(((x-mu)*sigma_inv), (x-mu)'));
+                    e = exp((-1/2)*dot((x-mu)*sigma_inv, (x-mu)'));
                     
                     likelihood(a) = scalar * e;
                     
