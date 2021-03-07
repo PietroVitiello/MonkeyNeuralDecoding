@@ -129,7 +129,7 @@ classdef PositionEstimator
             Q = (1/size(labels, 2))*(c1 - H*c2);
         end
         
-        function [A, W, H, Q] = computeDynamics(x, z)
+        function [A, W, H, Q] = computeDynamics(obj, x, z)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -156,10 +156,10 @@ classdef PositionEstimator
             H = [];
             Q = [];
             for a = 1:size(x)
-                A = [A; calculateA(x{a})];
-                W = [W; calculateA(x{a}, A(:,:,end))];
-                H = [H; calculateA(z{a}, x{a})];
-                Q = [Q; calculateA(z{a}, x{a}, H(:,:,end))];
+                A = [A; obj.calculateA(x{a})];
+                W = [W; obj.calculateW(x{a}, A(:,:,end))];
+                H = [H; obj.calculateH(z{a}, x{a})];
+                Q = [Q; obj.calculateQ(z{a}, x{a}, H(:,:,end))];
             end
         end
         
