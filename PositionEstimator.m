@@ -68,7 +68,7 @@ classdef PositionEstimator
             end    
         end
         
-        function A = calculateA(~, x, M)
+        function A = calculateA(~, x)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -76,7 +76,7 @@ classdef PositionEstimator
             for the labels
             
             -input
-            x: (time steps) x (label dimesnions)
+            x: (label dimensions) x (time steps)
             
             -output
             A: labels dynamics matrix
@@ -84,7 +84,7 @@ classdef PositionEstimator
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %}
             
-            d = size(x, 1);
+            [d, M] = size(x);
             sum1 = zeros(d);
             sum2 = zeros(d);
             
@@ -106,9 +106,10 @@ classdef PositionEstimator
             W = (1/size(labels, 2)-1)*(c1 - A*c2);
         end
         
-        function H = calculateH(~, z, x, M)
-            sum1 = zeros(size(z, 2), size(x, 2));
-            sum2 = zeros(size(z, 2), size(x, 2));
+        function H = calculateH(~, z, x)
+            M = size(x, 2);
+            sum1 = zeros(size(z, 2), M);
+            sum2 = zeros(size(z, 2), M);
             
             for k = 1:M
                 sum1 = sum1 + (z(:, k)*x(:, k)');
@@ -126,6 +127,40 @@ classdef PositionEstimator
                 c2 = c2 + (labels(:,k)*samples(:,k)');
             end
             Q = (1/size(labels, 2))*(c1 - H*c2);
+        end
+        
+        function [A, W, H, Q] = computeDynamics(x, z)
+            %{
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            
+            The purpose of this function is to return the dynamics and
+            covariance matrices of the system
+            
+            -input
+            x: (number of angles)x1 cell with each cell being
+               (label dimensions) x (time steps)
+            z: (number of angles)x1 cell with each cell being
+               (number of neurons) x (time steps)
+            
+            -output
+            A: labels dynamics matrix
+            W: labels noise covariance
+            H: stimulus dynamics matrix
+            A: stimulus noise covariance
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %}
+            
+            A = [];
+            W = [];
+            H = [];
+            Q = [];
+            for a = 1:size(x)
+                A = [A; calculateA(x{a})];
+                W = [W; calculateA(x{a}, A(:,:,end))];
+                H = [H; calculateA(z{a}, x{a})];
+                Q = [Q; calculateA(z{a}, x{a}, H(:,:,end))];
+            end
         end
         
     end
