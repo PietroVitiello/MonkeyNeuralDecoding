@@ -15,7 +15,7 @@ classdef PositionEstimator
             P_estim = (eye(size(x_prev, 1), size(x_prev, 1)) - K_gain*H)*P_pred;
         end
         
-        function [eeg_train, eeg_test, x_train, x_test] = getLabels(~, trial, delta, percent, start)
+        function [eeg_train, eeg_test, x_train, x_test] = getDataset(~, trial, delta, percent, start)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -104,19 +104,19 @@ classdef PositionEstimator
         end
         
         function W = calculateW(~, labels, A)
-            c1 = 0;
-            c2 = 0;
+            c1 = zeros(size(labels, 1));
+            c2 = zeros(size(labels, 1));
             for k = 2:size(labels, 2)
                 c1 = c1 + (labels(:,k)*labels(:,k)');
                 c2 = c2 + (labels(:,k-1)*labels(:,k)');
             end
-            W = (1/size(labels, 2)-1)*(c1 - A*c2);
+            W = (1/(size(labels, 2)-1))*(c1 - A*c2);
         end
         
         function H = calculateH(~, z, x)
             M = size(x, 2);
-            sum1 = zeros(size(z, 2), M);
-            sum2 = zeros(size(z, 2), M);
+            sum1 = zeros(size(z, 1), size(x, 1));
+            sum2 = zeros(size(x,1));
             
             for k = 1:M
                 sum1 = sum1 + (z(:, k)*x(:, k)');
@@ -127,8 +127,8 @@ classdef PositionEstimator
         end
         
         function Q = calculateQ(~, samples, labels, H)
-            c1 = 0;
-            c2 = 0;
+            c1 = zeros(size(samples, 1));
+            c2 = zeros(size(labels, 1), size(samples, 1));
             for k = 2:size(labels, 2)
                 c1 = c1 + (samples(:,k)*samples(:,k)');
                 c2 = c2 + (labels(:,k)*samples(:,k)');
@@ -163,10 +163,10 @@ classdef PositionEstimator
             H = [];
             Q = [];
             for a = 1:size(x)
-                A = [A; obj.calculateA(x{a})];
-                W = [W; obj.calculateW(x{a}, A(:,:,end))];
-                H = [H; obj.calculateH(z{a}, x{a})];
-                Q = [Q; obj.calculateQ(z{a}, x{a}, H(:,:,end))];
+                A = cat(3, A, obj.calculateA(x{a}));
+                W = cat(3, W, obj.calculateW(x{a}, A(:,:,end)));
+                H = cat(3, H, obj.calculateH(z{a}, x{a}));
+                Q = cat(3, Q, obj.calculateQ(z{a}, x{a}, H(:,:,end)));
             end
         end
         
