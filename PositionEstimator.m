@@ -107,12 +107,12 @@ classdef PositionEstimator
         end
         
         function H = calculateH(~, z, x, M)
-            sum1 = zeros(size(z, 1), size(x, 1));
-            sum2 = zeros(size(z, 1), size(x, 1));
+            sum1 = zeros(size(z, 2), size(x, 2));
+            sum2 = zeros(size(z, 2), size(x, 2));
             
             for k = 1:M
-                sum1 = sum1 + (z(k, :)*x(k, :)');
-                sum2 = sum2 + (x(k, :)*x(k, :)');
+                sum1 = sum1 + (z(:, k)*x(:, k)');
+                sum2 = sum2 + (x(:, k)*x(:, k)');
             end
             
             H = sum1/sum2;
