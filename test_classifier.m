@@ -35,7 +35,6 @@ for i=1:runs
 %     correct_angles = classified_data == test_labels.';
 %     n_correct_angles(i) = sum(correct_angles); %Number of correctly classified trials
 
-
 end
 
 plot(n_correct_angles)
