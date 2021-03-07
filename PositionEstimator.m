@@ -12,29 +12,29 @@ classdef PositionEstimator
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
-            The purpose of this function is to create a list of neurons
-            that have a high activity in the first 320ms to use for the 
-            angle classifier
+            The purpose of this function is to create the dynamics matrix
+            for the labels
             
             -input
-            x: trials x neurons
-            n: number of most active neurons taken for each angle without
-               repetition
-            lower_bound: lower bound of the sample window to consider
-            upper_bound: upper bound of the sample window to consider
+            M: number of time points
+            x: M x label_dimesnions
             
             -output
-            active_neurons: 1 x n*(number of angles) list of neurons
+            A: dynamics matrix
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %}
             
-            l = size(x, 1);
-            sum = zeros(l);
+            d = size(x, 1);
+            sum1 = zeros(d);
+            sum2 = zeros(d);
             
             for k = 2:M
-                sum = sum + (x)
+                sum1 = sum1 + (x(k,:)' * x(k-1,:));
+                sum2 = sum2 + (x(k-1,:)' * x(k-1,:));
             end
+            
+            A = sum1/sum2;
             
         end
         
