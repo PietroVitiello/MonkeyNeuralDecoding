@@ -1,6 +1,7 @@
 clc
 clear all
 load monkeydata_training
+
 estimator = PositionEstimator();
 
 %% Teting dataset creation function

@@ -134,7 +134,7 @@ classdef PositionEstimator
                 c2 = c2 + (labels(:,k)*samples(:,k)');
             end
             Q = (1/size(labels, 2))*(c1 - H*c2);
-        end
+        end       
         
         function [A, W, H, Q] = computeDynamics(obj, x, z)
             %{
