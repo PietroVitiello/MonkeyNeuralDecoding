@@ -1,9 +1,11 @@
 clc
 clear all
 load monkeydata_training
-%% 
-silent_neuron = [8 10 11 38 49 52 73 74 76];
 processor = Processing();
+a_classifier = AngleClassifier();
+
+%% KNN
+silent_neuron = [8 10 11 38 49 52 73 74 76];
 clean_trial = processor.clean_dataset(trial, silent_neuron);
 
 runs = 100;
@@ -24,8 +26,7 @@ for i=1:runs
         idxs = find(test_labels==angle);
         angle_distribution(i, angle) = (length(idxs))/(size(test_labels,1));
     end
-
-    a_classifier = AngleClassifier();
+    
     neighbours = 1:40;
 
     [train_metrics, test_metrics] = a_classifier.knn_classifier(training_samples, training_labels, test_samples, test_labels, 28);
@@ -39,6 +40,38 @@ end
 
 plot(n_correct_angles)
 
+correct_angles = classified_data == test_labels.';
+n_correct_angles = sum(correct_angles); %Number of correctly classified trials
 
+%% MLE
+silent_neuron = [8 10 11 38 49 52 73 74 76];
+clean_trial = processor.clean_dataset(trial, silent_neuron);
+active_neurons = processor.mostActive(clean_trial, 4);
 
+[train_mx, test_mx] = processor.data_as_matrix(clean_trial, active_neurons, 80);
 
+[estimated_angles, true_angles] = a_classifier.likelihood(train_mx, test_mx);
+
+correct_angles = estimated_angles == true_angles;
+accuracy = sum(correct_angles)/length(true_angles)*100
+
+%% Covariance
+silent_neuron = [8 10 11 38 49 52 73 74 76];
+clean_trial = processor.clean_dataset(trial, silent_neuron);
+active_neurons = processor.mostActive(clean_trial, 7);
+
+[train_mx, ~] = processor.data_as_matrix(clean_trial, active_neurons, 80);
+
+covariance_matrix = processor.covariance(train_mx, 1)
+
+%% Multidimensional MLE
+silent_neuron = [8 10 11 38 49 52 73 74 76];
+clean_trial = processor.clean_dataset(trial, silent_neuron);
+active_neurons = processor.mostActive(clean_trial, 1);
+
+[train_mx, test_mx] = processor.data_as_matrix(clean_trial, active_neurons, 90);
+
+[estimated_angles, true_angles] = a_classifier.multidimensional_mle(train_mx, test_mx);
+
+correct_angles = estimated_angles == true_angles;
+accuracy = sum(correct_angles)/length(true_angles)*100
