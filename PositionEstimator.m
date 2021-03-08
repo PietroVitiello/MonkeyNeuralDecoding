@@ -15,6 +15,72 @@ classdef PositionEstimator
             P_estim = (eye(size(x_prev, 1), size(x_prev, 1)) - K_gain*H)*P_pred;
         end
         
+        function [x_train, x_test] = getLabels(~, trial, delta, percent, win_size, deriv, start)
+            %{
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            
+            The purpose of this function is to create the training and
+            testing datasets both for stimulus and labels. The datasets are
+            created without separating between trials and with random
+            permutation of the millisecond recordings
+            
+            -input
+            trial: the given struct
+            delta: time lag between stimulus and label in ms
+            percent: percentage of training data
+            start: to which sample start (optional)
+            
+            -output
+            x_train: 2*(deriv+1) x (total time steps) labels signal for training
+            x_test: 2*(deriv+1) x (total time steps) labels for testing
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %}
+            
+            if nargin < 7
+                start = 1;
+            end
+            if nargin < 7
+                deriv = 1;
+            end
+            if nargin < 7
+                win_size = 1;
+            end
+            
+            first_t = start + delta;
+            [n_tr, n_a] = size(trial); % #trials, #angles
+            
+            eeg_train = cell(n_a, 1);
+            x_train = cell(n_a, 1);
+            eeg_test = cell(n_a, 1);
+            x_test = cell(n_a, 1);
+            
+            eeg = [];
+            x = [];
+            for a = 1:n_a
+                for tr = 1:n_tr
+                    for t = first_t:size(trial(tr,a).spikes, 2)
+                        eeg = [eeg trial(tr, a).spikes(:,t-delta)];
+                        hand_disp = trial(tr, a).handPos(1:2,t)-trial(tr, a).handPos(1:2,t-1);
+                        x = [x hand_disp];
+                    end
+                end
+                
+                n_train = floor(percent * size(eeg,2) / 100);
+                rand_id = randperm(size(eeg,2));
+                
+                eeg_train{a,1} = eeg(:, rand_id(1:n_train));
+                eeg_test{a,1} = eeg(:, rand_id(n_train+1:end));
+                x_train{a,1} = x(:, rand_id(1:n_train));
+                x_test{a,1} = x(:, rand_id(n_train+1:end));
+
+                eeg = [];
+                x = [];
+            end    
+            
+            
+        end
+        
         function [eeg_train, eeg_test, x_train, x_test] = getDataset(~, trial, delta, percent, start)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
