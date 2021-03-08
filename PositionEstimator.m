@@ -31,9 +31,9 @@ classdef PositionEstimator
             start: to which sample start (optional)
             
             -output
-            eeg_train: stimulus signal for trianing
+            eeg_train: stimulus signal for training
             eeg_test: stimulus signal for testing
-            x_train: labels signal for trianing
+            x_train: labels signal for training
             x_test: labels for testing
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

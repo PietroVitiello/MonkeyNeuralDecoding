@@ -10,5 +10,3 @@ estimator = PositionEstimator();
 %% Testing creation of dynamics matrices
 [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
 
-
-
