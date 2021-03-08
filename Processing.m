@@ -10,7 +10,6 @@ classdef Processing
                 for trial_n = 1:size(trial, 1)
                     for neuron_n = 1:length(silent_neurons)
                         trial(trial_n, angle_n).spikes(silent_neurons(neuron_n), :) = [];
-                        %trial(trial_n, angle_n).handPos(silent_neurons(neuron_n), :) = [];
                     end
                 end
             end
@@ -80,9 +79,6 @@ classdef Processing
                 row = row + 1;
             end 
         end
-
-        
-        
         
         
         function [samples, labels] = create_dataset(~, trial, active_neurons)

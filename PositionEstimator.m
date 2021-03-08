@@ -31,9 +31,9 @@ classdef PositionEstimator
             start: to which sample start (optional)
             
             -output
-            eeg_train: stimulus signal for trianing
+            eeg_train: stimulus signal for training
             eeg_test: stimulus signal for testing
-            x_train: labels signal for trianing
+            x_train: labels signal for training
             x_test: labels for testing
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -134,7 +134,7 @@ classdef PositionEstimator
                 c2 = c2 + (labels(:,k)*samples(:,k)');
             end
             Q = (1/size(labels, 2))*(c1 - H*c2);
-        end
+        end       
         
         function [A, W, H, Q] = computeDynamics(obj, x, z)
             %{

@@ -12,7 +12,6 @@ runs = 100;
 n_correct_angles = zeros(1, runs);
 angle_distribution=zeros(runs, size(clean_trial,2));
 for i=1:runs
-    i
     active_neurons = processor.mostActive(clean_trial, 9);
     [samples, labels] = processor.create_dataset(trial, active_neurons);
     
