@@ -15,7 +15,7 @@ classdef PositionEstimator
             P_estim = (eye(size(x_prev, 1), size(x_prev, 1)) - K_gain*H)*P_pred;
         end
         
-        function [eeg_train, eeg_test, x_train, x_test] = getDataset(~, trial, delta, percent, start)
+        function [x_train, x_test] = getLabels(~, trial, delta, percent, win_size, deriv, start)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -31,16 +31,20 @@ classdef PositionEstimator
             start: to which sample start (optional)
             
             -output
-            eeg_train: stimulus signal for training
-            eeg_test: stimulus signal for testing
-            x_train: labels signal for training
-            x_test: labels for testing
+            x_train: 2*(deriv+1) x (total time steps) labels signal for training
+            x_test: 2*(deriv+1) x (total time steps) labels for testing
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %}
-
-            if nargin < 5
+            
+            if nargin < 7
                 start = 1;
+            end
+            if nargin < 6
+                deriv = 1;
+            end
+            if nargin < 5
+                win_size = 1;
             end
             
             first_t = start + delta;
@@ -73,9 +77,77 @@ classdef PositionEstimator
                 eeg = [];
                 x = [];
             end    
+            
+            
         end
         
-        function A = calculateA(~, x)
+        function [state0, eeg_train, eeg_test, x_train, x_test] = getDataset(~, trial, lag, percent, start)
+            %{
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            
+            The purpose of this function is to create the training and
+            testing datasets both for stimulus and labels. The datasets are
+            created without separating between trials and with random
+            permutation of the millisecond recordings
+            
+            -input
+            trial: the given struct
+            delta: time lag between stimulus and label in ms
+            percent: percentage of training data
+            start: to which sample start (optional)
+            
+            -output
+            eeg_train: stimulus signal for training
+            eeg_test: stimulus signal for testing
+            x_train: labels signal for training
+            x_test: labels for testing
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %}
+            
+            if nargin < 5
+                start = 301;
+            end
+            
+            first_t = start - lag;
+            [n_tr, n_a] = size(trial); % #trials, #angles
+            
+            rand_id = randperm(n_tr);
+            n_train = floor(percent * n_tr / 100);
+            n_test = n_tr-n_train;
+            
+            state0 = zeros(2, n_a);
+            eeg_train = cell(n_a, n_train, 1);
+            x_train = cell(n_a, n_train, 1);
+            eeg_test = cell(n_a, n_test, 1);
+            x_test = cell(n_a, n_test, 1);
+            
+            for a = 1:n_a
+                for i_tr = 1:n_tr
+                    tr = rand_id(i_tr);
+                    
+                    average_handDisp = mean(diff(trial(tr, a).handPos(1:2,1:first_t-1)));
+                    state0(:, a) = state0(:, a) + average_handDisp/n_a;
+                    
+                    eeg = trial(tr, a).spikes(:,first_t:end-lag);
+                    x = diff(trial(tr, a).handPos(1:2,start:end));
+                    
+                    if i_tr <= n_train
+                        eeg_train{a,i_tr,1} = eeg;
+                        x_train{a,i_tr,1} = x;
+                    else
+                        eeg_test{a,i_tr-n_train,1} = eeg;
+                        x_test{a,i_tr-n_train,1} = x;
+                    end
+
+                    eeg = [];
+                    x = [];
+                    
+                end
+            end    
+        end
+        
+        function A = calculateA(~, x_cell)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -91,13 +163,17 @@ classdef PositionEstimator
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %}
             
-            [d, M] = size(x);
+            d = size(x_cell{1,1}, 1);
             sum1 = zeros(d);
             sum2 = zeros(d);
             
-            for k = 2:M
-                sum1 = sum1 + (x(:,k) * x(:,k-1)');
-                sum2 = sum2 + (x(:,k-1) * x(:,k-1)');
+            for tr = 1:size(x_cell, 2)
+                x = x_cell{1,tr};
+                M = size(x, 2);
+                for k = 2:M
+                    sum1 = sum1 + (x(:,k) * x(:,k-1)');
+                    sum2 = sum2 + (x(:,k-1) * x(:,k-1)');
+                end
             end
             
             A = sum1/sum2;
@@ -163,7 +239,7 @@ classdef PositionEstimator
             H = [];
             Q = [];
             for a = 1:size(x)
-                A = cat(3, A, obj.calculateA(x{a}));
+                A = cat(3, A, obj.calculateA(x(a,:)));
                 W = cat(3, W, obj.calculateW(x{a}, A(:,:,end)));
                 H = cat(3, H, obj.calculateH(z{a}, x{a}));
                 Q = cat(3, Q, obj.calculateQ(z{a}, x{a}, H(:,:,end)));

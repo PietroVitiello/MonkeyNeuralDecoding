@@ -51,8 +51,6 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   %     single structure containing all the learned parameters of your
   %     model and which can be used by the "positionEstimator" function.
   
-  modelParameters = [2, 1];
-  
 end
 
 function [x, y] = positionEstimator(test_data, modelParameters)
@@ -102,7 +100,6 @@ function [x, y] = positionEstimator(test_data, modelParameters)
   
   % - [x, y]:
   %     current position of the hand
-  
-  [x, y] = rand(modelParameters);
+
    
 end
