@@ -1,54 +1,31 @@
-function [x, y] = positionEstimator(test_data, modelParameters)
-
-  % **********************************************************
-  %
-  % You can also use the following function header to keep your state
-  % from the last iteration
-  %
-  % function [x, y, newModelParameters] = positionEstimator(test_data, modelParameters)
-  %                 ^^^^^^^^^^^^^^^^^^
-  % Please note that this is optional. You can still use the old function
-  % declaration without returning new model parameters. 
-  %
-  % *********************************************************
-
-  % - test_data:
-  %     test_data(m).trialID
-  %         unique trial ID
-  %     test_data(m).startHandPos
-  %         2x1 vector giving the [x y] position of the hand at the start
-  %         of the trial
-  %     test_data(m).decodedHandPos
-  %         [2xN] vector giving the hand position estimated by your
-  %         algorithm during the previous iterations. In this case, N is 
-  %         the number of times your function has been called previously on
-  %         the same data sequence.
-  %     test_data(m).spikes(i,t) (m = trial id, i = neuron id, t = time)
-  %     in this case, t goes from 1 to the current time in steps of 20
-  %     Example:
-  %         Iteration 1 (t = 320):
-  %             test_data.trialID = 1;
-  %             test_data.startHandPos = [0; 0]
-  %             test_data.decodedHandPos = []
-  %             test_data.spikes = 98x320 matrix of spiking activity
-  %         Iteration 2 (t = 340):
-  %             test_data.trialID = 1;
-  %             test_data.startHandPos = [0; 0]
-  %             test_data.decodedHandPos = [2.3; 1.5]
-  %             test_data.spikes = 98x340 matrix of spiking activity
-  
-  
-  
-  % ... compute position at the given timestep.
-  
+function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   % Return Value:
   
   % - [x, y]:
   %     current position of the hand
   
-  nana = rand(modelParameters);
+  spikes = test_data.spikes;
+  [x,y] = test_data.decodedHandPos;
+  length_all = size(test_data.spikes,2);
+  length_ = 320;
+  if size(spikes, 2) <= length_
+      init_spikes = spikes(modelParameters.neurons, 1:length_);
+      angle_n = predict(Mdl, init_spikes);
+      init_x = modelParameters.initial_params;
+      init_P = modelParameters.init_P;
+      [x,y] = test_data.startHandPos;
+  end
+  A = modelParameters.A(:, :, angle_n);
+  H = modelParameters.H(:, :, angle_n);
+  Q = modelParameters.Q(:, :, angle_n);
+  W = modelParameters.W(:, :, angle_n);
+  estimator = modelParameters.pos_estimator;
   
- x = nana(1);
- y = nana(2);
-   
+  for i = length_all-19:length_all
+      obs = spikes(:, i);
+      [init_x, init_P] = estimator.update(A, init_x, H, Q, W, init_P, obs);
+      x = x + init_x(1);
+      y = y + init_x(2);
+  end
+ 
 end

@@ -1,19 +1,22 @@
 function [modelParameters] = positionEstimatorTraining(training_data)
   % Arguments:
-  
+ 
   % - training_data:
   %     training_data(n,k)              (n = trial id,  k = reaching angle)
   %     training_data(n,k).trialId      unique number of the trial
   %     training_data(n,k).spikes(i,t)  (i = neuron id, t = time)
   %     training_data(n,k).handPos(d,t) (d = dimension [1-3], t = time)
   
-  % ... train your model
-  
   % Return Value:
   
   % - modelParameters:
-  %     single structure containing all the learned parameters of your
-  %     model and which can be used by the "positionEstimator" function.
+  %     - A
+  %     - W
+  %     - H
+  %     - Q
+  %     - classifier
+  %     - initial parameters
+  
   
   processor = Processing();
   a_classifier = AngleClassifier();
@@ -33,10 +36,17 @@ function [modelParameters] = positionEstimatorTraining(training_data)
    
   [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
   
+  neurons = 1:1:98;
+  neurons = (neurons~=silent_neuron)*neurons;
+  neurons(neurons==0) = [];
+  
   modelParameters.A = A; 
   modelParameters.W = W;
   modelParameters.H = H;
   modelParameters.Q = Q;
   modelParameters.classifier = Mdl;
   modelParameters.initial_params = state0;
+  modelParameters.neurons = neurons;
+  modelParameters.pos_estimator = estimator;
+  modelParameters.init_P = zeros(2,2);
 end

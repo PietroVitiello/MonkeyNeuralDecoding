@@ -1,4 +1,4 @@
-classdef PositionEstimator_cl
+classdef PositionEstimator
     
     properties
         
@@ -179,37 +179,57 @@ classdef PositionEstimator_cl
             A = sum1/sum2;
         end
         
-        function W = calculateW(~, labels, A)
-            c1 = zeros(size(labels, 1));
-            c2 = zeros(size(labels, 1));
-            for k = 2:size(labels, 2)
-                c1 = c1 + (labels(:,k)*labels(:,k)');
-                c2 = c2 + (labels(:,k-1)*labels(:,k)');
+        function W = calculateW(~, x_cell, A)
+            d = size(x_cell{1,1}, 1);
+            
+            c1 = zeros(d);
+            c2 = zeros(d);
+            for tr = 1:size(x_cell, 2)
+                x = x_cell{1,tr};
+                M = size(x, 2); 
+                for k = 2:M
+                    c1 = c1 + (x(:,k)*x(:,k)');
+                    c2 = c2 + (x(:,k-1)*x(:,k)');
+                end
             end
-            W = (1/(size(labels, 2)-1))*(c1 - A*c2);
+            W = (1/(M-1))*(c1 - A*c2);
         end
         
-        function H = calculateH(~, z, x)
-            M = size(x, 2);
-            sum1 = zeros(size(z, 1), size(x, 1));
-            sum2 = zeros(size(x,1));
+        function H = calculateH(~, z_cell, x_cell)
+            d_x = size(x_cell{1,1}, 1);
+            d_z = size(z_cell{1,1}, 1);
             
-            for k = 1:M
-                sum1 = sum1 + (z(:, k)*x(:, k)');
-                sum2 = sum2 + (x(:, k)*x(:, k)');
+            sum1 = zeros(d_z, d_x);
+            sum2 = zeros(d_x);
+            for tr = 1:size(x_cell, 2)
+                x = x_cell{1,tr};
+                z = z_cell{1,tr};
+                M = size(x, 2); 
+                for k = 1:M
+                    sum1 = sum1 + (z(:, k)*x(:, k)');
+                    sum2 = sum2 + (x(:, k)*x(:, k)');
+                end
             end
             
             H = sum1/sum2;
         end
         
-        function Q = calculateQ(~, samples, labels, H)
-            c1 = zeros(size(samples, 1));
-            c2 = zeros(size(labels, 1), size(samples, 1));
-            for k = 2:size(labels, 2)
-                c1 = c1 + (samples(:,k)*samples(:,k)');
-                c2 = c2 + (labels(:,k)*samples(:,k)');
+        function Q = calculateQ(~, z_cell, x_cell, H)
+            d_x = size(x_cell{1,1}, 1);
+            d_z = size(z_cell{1,1}, 1);
+            
+            c1 = zeros(d_z);
+            c2 = zeros(d_x, d_z);
+            for tr = 1:size(x_cell, 2)
+                x = x_cell{1,tr};
+                z = z_cell{1,tr};
+                M = size(x, 2);
+                for k = 2:M
+                    c1 = c1 + (z(:,k)*z(:,k)');
+                    c2 = c2 + (x(:,k)*z(:,k)');
+                end
             end
-            Q = (1/size(labels, 2))*(c1 - H*c2);
+            Q = (1/M)*(c1 - H*c2);
         end       
         
         function [A, W, H, Q] = computeDynamics(obj, x, z)
@@ -240,9 +260,9 @@ classdef PositionEstimator_cl
             Q = [];
             for a = 1:size(x)
                 A = cat(3, A, obj.calculateA(x(a,:)));
-                W = cat(3, W, obj.calculateW(x{a}, A(:,:,end)));
-                H = cat(3, H, obj.calculateH(z{a}, x{a}));
-                Q = cat(3, Q, obj.calculateQ(z{a}, x{a}, H(:,:,end)));
+                W = cat(3, W, obj.calculateW(x(a,:), A(:,:,end)));
+                H = cat(3, H, obj.calculateH(z(a,:), x(a,:)));
+                Q = cat(3, Q, obj.calculateQ(z(a,:), x(a,:), H(:,:,end)));
             end
         end
         
