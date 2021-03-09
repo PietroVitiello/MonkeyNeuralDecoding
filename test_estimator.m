@@ -1,7 +1,6 @@
 clc
 clear all
 load monkeydata_training
-
 estimator = PositionEstimator();
 
 %% Testing dataset creation function
