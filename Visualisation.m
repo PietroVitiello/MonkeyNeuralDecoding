@@ -204,16 +204,14 @@ end
 average_hand_pos = zeros(2, min_length);
 average_deltaHand = zeros(size(trial, 2), min_length-1);
 
-window_size = 20;
-
-for angle_n = 1:esize(trial, 2)
+for angle_n = 1:size(trial, 2)
     for i = 1:size(trial, 1)
         average_hand_pos(1, :) = average_hand_pos(1, :) + trial(i,angle_n).handPos(1,1:min_length)/size(trial, 1);
         average_hand_pos(2, :) = average_hand_pos(2, :) + trial(i,angle_n).handPos(2,1:min_length)/size(trial, 1);
     end
 %     average_deltaHand(angle_n, :) = pdist([average_hand_pos(angle_n, 2:end,:); average_hand_pos(angle_n, 1:end-1,:)], 'euclidean');
-    for i = 1:min_length-window_size
-        average_deltaHand(angle_n, i) = norm(average_hand_pos(:, i+window_size) - average_hand_pos(:, i));
+    for i = 1:min_length-1
+        average_deltaHand(angle_n, i) = norm(average_hand_pos(:, i+1) - average_hand_pos(:, i));
     end
     average_hand_pos = zeros(2, min_length);
 end
