@@ -1,4 +1,4 @@
-classdef PositionEstimator
+classdef PositionEstimator_cl
     
     properties
         
@@ -8,9 +8,9 @@ classdef PositionEstimator
         
         function [x_estim, P_estim] = update(~, A, x_prev, H, Q, R, P_prev, obs)
             x_pred = A*x_prev;
-            P_pred = A*P_prev*A' + Q;
+            P_pred = A*P_prev*A' + R;
             
-            K_gain = P_pred*H'*(inv(H*P_pred*H' + R));
+            K_gain = P_pred*H'/(H*P_pred*H' + Q);
             x_estim = x_pred + K_gain*(obs - H*x_pred);
             P_estim = (eye(size(x_prev, 1), size(x_prev, 1)) - K_gain*H)*P_pred;
         end
@@ -126,7 +126,7 @@ classdef PositionEstimator
                 for i_tr = 1:n_tr
                     tr = rand_id(i_tr);
                     
-                    average_handDisp = mean(diff(trial(tr, a).handPos(1:2,1:first_t-1)));
+                    average_handDisp = mean(diff(trial(tr, a).handPos(1:2,1:first_t-1),1,2),2);
                     state0(:, a) = state0(:, a) + average_handDisp/n_tr;
                     
                     eeg = trial(tr, a).spikes(:,first_t:end-lag);
@@ -184,15 +184,19 @@ classdef PositionEstimator
             
             c1 = zeros(d);
             c2 = zeros(d);
+            MM = 0; 
             for tr = 1:size(x_cell, 2)
                 x = x_cell{1,tr};
                 M = size(x, 2); 
+                MM = MM + M;
                 for k = 2:M
                     c1 = c1 + (x(:,k)*x(:,k)');
                     c2 = c2 + (x(:,k-1)*x(:,k)');
                 end
+                c1 = 1/(M-1)*c1;
+                c2 = 1/(M-1)*c2;
             end
-            W = (1/(M-1))*(c1 - A*c2);
+            W = (1/(MM-1))*(c1 - A*c2);
         end
         
         function H = calculateH(~, z_cell, x_cell)
@@ -220,16 +224,18 @@ classdef PositionEstimator
             
             c1 = zeros(d_z);
             c2 = zeros(d_x, d_z);
+            MM = 0;
             for tr = 1:size(x_cell, 2)
                 x = x_cell{1,tr};
                 z = z_cell{1,tr};
                 M = size(x, 2);
-                for k = 2:M
+                MM = MM + M;
+                for k = 1:M
                     c1 = c1 + (z(:,k)*z(:,k)');
                     c2 = c2 + (x(:,k)*z(:,k)');
                 end
             end
-            Q = (1/M)*(c1 - H*c2);
+            Q = (1/MM)*(c1 - H*c2);
         end       
         
         function [A, W, H, Q] = computeDynamics(obj, x, z)

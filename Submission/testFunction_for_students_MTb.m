@@ -12,11 +12,11 @@ load monkeydata0.mat
 rng(2013);
 ix = randperm(length(trial));
 
-addpath(teamName);
+% addpath(teamName);
 
 % Select training and testing data (you can choose to split your data in a different way if you wish)
-trainingData = trial(ix(1:50),:);
-testData = trial(ix(51:end),:);
+trainingData = trial(ix(1:80),:);
+testData = trial(ix(81:end),:);
 
 fprintf('Testing the continuous position estimator...')
 
@@ -37,8 +37,8 @@ for tr=1:size(testData,1)
     for direc=randperm(8) 
         decodedHandPos = [];
 
-        times=320:20:size(testData(tr,direc).spikes,2);
-        
+        %times=320:20:size(testData(tr,direc).spikes,2);
+        times = 320;
         for t=times
             past_current_trial.trialId = testData(tr,direc).trialId;
             past_current_trial.spikes = testData(tr,direc).spikes(:,1:t); 

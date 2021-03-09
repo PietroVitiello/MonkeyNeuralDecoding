@@ -22,8 +22,8 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   a_classifier = AngleClassifier();
   estimator = PositionEstimator_cl();
  
-  silent_neuron = [8 10 11 38 49 52 73 74 76];
-  clean_trial = processor.clean_dataset(training_data, silent_neuron);
+  silent_neurons = [8 10 11 38 49 52 73 74 76];
+  clean_trial = processor.clean_dataset(training_data, silent_neurons);
   
   neurons_per_angle = 9;
   active_neurons = processor.mostActive(clean_trial, neurons_per_angle);
@@ -36,17 +36,13 @@ function [modelParameters] = positionEstimatorTraining(training_data)
    
   [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
   
-  neurons = 1:1:98;
-  neurons = (neurons~=silent_neuron)*neurons;
-  neurons(neurons==0) = [];
-  
   modelParameters.A = A; 
   modelParameters.W = W;
   modelParameters.H = H;
   modelParameters.Q = Q;
   modelParameters.classifier = Mdl;
   modelParameters.initial_params = state0;
-  modelParameters.neurons = neurons;
+  modelParameters.neurons = active_neurons;
   modelParameters.pos_estimator = estimator;
-  modelParameters.init_P = zeros(2,2);
+  modelParameters.init_error_cov = ones(2,2);
 end

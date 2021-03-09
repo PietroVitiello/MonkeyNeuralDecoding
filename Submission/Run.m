@@ -1,4 +1,5 @@
-% testFunction_for_students_MTb('Team Cassius')
 clc
-load monkeydata_training
-modelParameters = positionEstimatorTraining(trial);
+load monkeydata0
+testFunction_for_students_MTb('Team Cassius')
+
+
