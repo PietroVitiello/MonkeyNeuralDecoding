@@ -127,10 +127,10 @@ classdef PositionEstimator
                     tr = rand_id(i_tr);
                     
                     average_handDisp = mean(diff(trial(tr, a).handPos(1:2,1:first_t-1)));
-                    state0(:, a) = state0(:, a) + average_handDisp/n_a;
+                    state0(:, a) = state0(:, a) + average_handDisp/n_tr;
                     
                     eeg = trial(tr, a).spikes(:,first_t:end-lag);
-                    x = diff(trial(tr, a).handPos(1:2,start:end));
+                    x = diff(trial(tr, a).handPos(1:2,start:end), 1, 2);
                     
                     if i_tr <= n_train
                         eeg_train{a,i_tr,1} = eeg;
