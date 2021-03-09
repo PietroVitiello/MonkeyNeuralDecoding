@@ -40,10 +40,10 @@ classdef PositionEstimator
             if nargin < 7
                 start = 1;
             end
-            if nargin < 7
+            if nargin < 6
                 deriv = 1;
             end
-            if nargin < 7
+            if nargin < 5
                 win_size = 1;
             end
             
@@ -81,7 +81,7 @@ classdef PositionEstimator
             
         end
         
-        function [eeg_train, eeg_test, x_train, x_test] = getDataset(~, trial, delta, percent, start)
+        function [state0, eeg_train, eeg_test, x_train, x_test] = getDataset(~, trial, lag, percent, start)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -104,44 +104,50 @@ classdef PositionEstimator
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %}
-
+            
             if nargin < 5
-                start = 1;
+                start = 301;
             end
             
-            first_t = start + delta;
+            first_t = start - lag;
             [n_tr, n_a] = size(trial); % #trials, #angles
             
-            eeg_train = cell(n_a, 1);
-            x_train = cell(n_a, 1);
-            eeg_test = cell(n_a, 1);
-            x_test = cell(n_a, 1);
+            rand_id = randperm(n_tr);
+            n_train = floor(percent * n_tr / 100);
+            n_test = n_tr-n_train;
             
-            eeg = [];
-            x = [];
+            state0 = zeros(2, n_a);
+            eeg_train = cell(n_a, n_train, 1);
+            x_train = cell(n_a, n_train, 1);
+            eeg_test = cell(n_a, n_test, 1);
+            x_test = cell(n_a, n_test, 1);
+            
             for a = 1:n_a
-                for tr = 1:n_tr
-                    for t = first_t:size(trial(tr,a).spikes, 2)
-                        eeg = [eeg trial(tr, a).spikes(:,t-delta)];
-                        hand_disp = trial(tr, a).handPos(1:2,t)-trial(tr, a).handPos(1:2,t-1);
-                        x = [x hand_disp];
+                for i_tr = 1:n_tr
+                    tr = rand_id(i_tr);
+                    
+                    average_handDisp = mean(diff(trial(tr, a).handPos(1:2,1:first_t-1)));
+                    state0(:, a) = state0(:, a) + average_handDisp/n_a;
+                    
+                    eeg = trial(tr, a).spikes(:,first_t:end-lag);
+                    x = diff(trial(tr, a).handPos(1:2,start:end));
+                    
+                    if i_tr <= n_train
+                        eeg_train{a,i_tr,1} = eeg;
+                        x_train{a,i_tr,1} = x;
+                    else
+                        eeg_test{a,i_tr-n_train,1} = eeg;
+                        x_test{a,i_tr-n_train,1} = x;
                     end
-                end
-                
-                n_train = floor(percent * size(eeg,2) / 100);
-                rand_id = randperm(size(eeg,2));
-                
-                eeg_train{a,1} = eeg(:, rand_id(1:n_train));
-                eeg_test{a,1} = eeg(:, rand_id(n_train+1:end));
-                x_train{a,1} = x(:, rand_id(1:n_train));
-                x_test{a,1} = x(:, rand_id(n_train+1:end));
 
-                eeg = [];
-                x = [];
+                    eeg = [];
+                    x = [];
+                    
+                end
             end    
         end
         
-        function A = calculateA(~, x)
+        function A = calculateA(~, x_cell)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -157,13 +163,17 @@ classdef PositionEstimator
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %}
             
-            [d, M] = size(x);
+            d = size(x_cell{1,1}, 1);
             sum1 = zeros(d);
             sum2 = zeros(d);
             
-            for k = 2:M
-                sum1 = sum1 + (x(:,k) * x(:,k-1)');
-                sum2 = sum2 + (x(:,k-1) * x(:,k-1)');
+            for tr = 1:size(x_cell, 2)
+                x = x_cell{1,tr};
+                M = size(x, 2);
+                for k = 2:M
+                    sum1 = sum1 + (x(:,k) * x(:,k-1)');
+                    sum2 = sum2 + (x(:,k-1) * x(:,k-1)');
+                end
             end
             
             A = sum1/sum2;
@@ -229,7 +239,7 @@ classdef PositionEstimator
             H = [];
             Q = [];
             for a = 1:size(x)
-                A = cat(3, A, obj.calculateA(x{a}));
+                A = cat(3, A, obj.calculateA(x(a,:)));
                 W = cat(3, W, obj.calculateW(x{a}, A(:,:,end)));
                 H = cat(3, H, obj.calculateH(z{a}, x{a}));
                 Q = cat(3, Q, obj.calculateQ(z{a}, x{a}, H(:,:,end)));
