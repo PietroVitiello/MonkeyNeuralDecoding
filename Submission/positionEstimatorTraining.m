@@ -17,7 +17,7 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   %     - classifier
   %     - initial parameters
   
-  
+ 
   processor = Processing();
   a_classifier = AngleClassifier();
   estimator = PositionEstimator_cl();
