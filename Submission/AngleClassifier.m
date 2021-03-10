@@ -105,7 +105,7 @@ classdef AngleClassifier
             scalar_ = zeros(n_angles, 1);
             for angle = 1:n_angles
                 sigma = cov(train_data(:,:,angle));
-                %add error message if not invertible?
+                %add error message if not invertible??
                 sigma_inv_(:,:,angle) = inv(sigma);
                 
                 scalar_(angle) = 1/sqrt(((2*pi)^d)*det(sigma));
