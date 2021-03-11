@@ -22,17 +22,27 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   a_classifier = AngleClassifier();
   estimator = PositionEstimator_cl();
  
-  silent_neurons = [8 10 11 38 49 52 73 74 76];
+  silent_neurons = [8 10 11 38 49 52 73 74 76]; 
+  %9 neurons with the least firing across trials and angles
+  whos training_data
   clean_trial = processor.clean_dataset(training_data, silent_neurons);
+  whos clean_trial
+  whos training_data
+  %Silent neurons are cleared out of the training data
   
   neurons_per_angle = 9;
-  active_neurons = processor.mostActive(clean_trial, neurons_per_angle);
-  [samples, labels] = processor.create_dataset(training_data, active_neurons);
+  active_neurons = processor.mostActive(clean_trial, neurons_per_angle); 
+  %Most active neurons across trials and angles
+  [samples, labels] = processor.create_dataset(training_data, active_neurons); 
+  %Sample & label dataset is created to build a K-nearest neighbours
+  %classifier
   
-  n_neighbours = 28;
+  n_neighbours = 28; %Number of nearest neighbours
   [Mdl, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);
+  %Mdl contains the parameters of the classifier
   
-  [state0, eeg_train, ~, x_train, ~] = estimator.getDataset(training_data, 1, 80);
+  [state0, eeg_train, ~, x_train, ~] = estimator.getDataset(training_data, 1, 100);
+  % state0
    
   [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
   

@@ -24,7 +24,7 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   A = modelParameters.A(:, :, modelParameters.angle_n);
   H = modelParameters.H(:, :, modelParameters.angle_n);
   Q = modelParameters.Q(:, :, modelParameters.angle_n);
-  inv(Q)
+  inv(Q);
   W = modelParameters.W(:, :, modelParameters.angle_n);
   estimator = modelParameters.pos_estimator;
   

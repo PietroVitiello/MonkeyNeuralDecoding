@@ -92,7 +92,7 @@ classdef PositionEstimator_cl
             
             -input
             trial: the given struct
-            delta: time lag between stimulus and label in ms
+            lag: time lag between stimulus and label in ms
             percent: percentage of training data
             start: to which sample start (optional)
             
