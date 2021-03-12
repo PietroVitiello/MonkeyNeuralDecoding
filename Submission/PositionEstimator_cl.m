@@ -10,7 +10,7 @@ classdef PositionEstimator_cl
             x_pred = A*x_prev;
             P_pred = A*P_prev*A' + R;
             
-            K_gain = P_pred*H'*(inv(H*P_pred*H' + Q));
+            K_gain = P_pred*H'*(pinv(H*P_pred*H' + Q));
             x_estim = x_pred + K_gain*(obs - H*x_pred);
             P_estim = (eye(size(x_prev, 1)) - K_gain*H)*P_pred;
         end
@@ -81,6 +81,184 @@ classdef PositionEstimator_cl
             
         end
         
+        
+        
+        
+        
+        
+        function usable_data = apply_dataset___(~, data, lag, bin_size)
+            
+            [n_n, len] = size(data);
+            first_t = len - 19 - lag;
+            
+            rows = n_n*2;
+%             usable_data = zeros(rows, 20);
+            usable_data = zeros(n_n, 20);
+%             usable_data(1:2:rows, :) = data(:,first_t:end-lag);
+            for history = 1:bin_size
+%                 usable_data(2:2:rows, :) = usable_data(2:2:rows, :) + ...
+                usable_data = usable_data + ...
+                                           (data(:,(first_t-history):(end-lag-history)) ...
+                                           * 10 / 2^(history));
+            end
+            step = 1;
+            time_steps = (first_t:1:first_t+19).*step;
+            usable_data = [exp(time_steps) ; usable_data];
+        end
+        
+        function [state0, eeg_train, eeg_test, x_train, x_test] = sayonara___(~, trial, lag, bin_size, order, percent, start)
+            if nargin < 7
+                start = 301;
+            end
+            
+            first_t = start - lag;
+            [n_tr, n_a] = size(trial); % #trials, #angles
+            n_n = size(trial(1,1).spikes, 1); % #neurons
+            
+            rand_id = randperm(n_tr);
+            n_train = floor(percent * n_tr / 100);
+            n_test = n_tr-n_train;
+            
+            state0 = zeros(2*(order+1), n_a);
+            eeg_train = cell(n_a, n_train, 1);
+            x_train = cell(n_a, n_train, 1);
+            eeg_test = cell(n_a, n_test, 1);
+            x_test = cell(n_a, n_test, 1);
+            
+            for a = 1:n_a
+                for i_tr = 1:n_tr
+                    tr = rand_id(i_tr);
+                    
+                    len = size(trial(tr, a).spikes, 2);
+                    rows = n_n*2;
+%                     eeg = zeros(rows, len-start+1);
+                    eeg = zeros(n_n, len-start+1);
+%                     eeg(1:2:rows, :) = trial(tr, a).spikes(:,first_t:end-lag);
+                    for history = 1:bin_size
+%                         eeg(2:2:rows, :) = eeg(2:2:rows, :) + ...
+                        eeg = eeg + ...
+                                           (trial(tr, a).spikes(:,(first_t-history):(end-lag-history)) ...
+                                           * 10 / 2^(history)) ;
+                    end
+                    step = 1;
+                    time_steps = (1:1:len-start+1) .* step;
+                    eeg = [exp(time_steps) ; eeg];
+                    
+                    x = [];
+                    for o = 0 : order
+                        starting = start - (o + 1);
+                        x = [x; ...
+                            diff(trial(tr, a).handPos(1:2,starting:end), o+1, 2)];
+                        
+                        average_state = mean(diff(trial(tr, a).handPos(1:2,1:first_t-1),o+1,2),2);
+                        state0((1:2)*(o+1), a) = state0((1:2)*(o+1), a) + average_state/n_tr;
+                    end
+                    
+                    if i_tr <= n_train
+                        eeg_train{a,i_tr,1} = eeg;
+                        x_train{a,i_tr,1} = x;
+                    else
+                        eeg_test{a,i_tr-n_train,1} = eeg;
+                        x_test{a,i_tr-n_train,1} = x;
+                    end
+                    
+                end
+            end
+            state0(1:2, :) = [];
+        end
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        function usable_data = apply_dataset(~, data, lag, bin_size)
+            
+            [n_n, len] = size(data);
+            first_t = len - 19 - lag;
+            
+            rows = n_n*2;
+            usable_data = zeros(rows, 20);
+%             usable_data = zeros(n_n, 20);
+            usable_data(1:2:rows, :) = data(:,first_t:end-lag);
+            for history = 1:bin_size
+%                 usable_data(2:2:rows, :) = usable_data(2:2:rows, :) + ...
+%                 usable_data = usable_data + ...
+                usable_data(2:2:rows, :) = usable_data(2:2:rows, :) + ...
+                                           (data(:,(first_t-history):(end-lag-history)) ...
+                                           * 10 / bin_size);
+            end
+%             step = 1;
+%             time_steps = (first_t:1:first_t+19).*step;
+%             usable_data = [exp(time_steps) ; usable_data];
+        end
+        
+        function [state0, eeg_train, eeg_test, x_train, x_test] = sayonara(~, trial, lag, bin_size, order, percent, start)
+            if nargin < 7
+                start = 301;
+            end
+            
+            first_t = start - lag;
+            [n_tr, n_a] = size(trial); % #trials, #angles
+            n_n = size(trial(1,1).spikes, 1); % #neurons
+            
+            rand_id = randperm(n_tr);
+            n_train = floor(percent * n_tr / 100);
+            n_test = n_tr-n_train;
+            
+            state0 = zeros(2*(order+1), n_a);
+            eeg_train = cell(n_a, n_train, 1);
+            x_train = cell(n_a, n_train, 1);
+            eeg_test = cell(n_a, n_test, 1);
+            x_test = cell(n_a, n_test, 1);
+            
+            for a = 1:n_a
+                for i_tr = 1:n_tr
+                    tr = rand_id(i_tr);
+                    
+                    len = size(trial(tr, a).spikes, 2);
+                    rows = n_n*2;
+                    eeg = zeros(rows, len-start+1);
+%                     eeg = zeros(n_n, len-start+1);
+                    eeg(1:2:rows, :) = trial(tr, a).spikes(:,first_t:end-lag);
+                    for history = 1:bin_size
+%                         eeg(2:2:rows, :) = eeg(2:2:rows, :) + ...
+%                         eeg = eeg + ...
+                        eeg(2:2:rows, :) = eeg(2:2:rows, :) + ...
+                                           (trial(tr, a).spikes(:,(first_t-history):(end-lag-history)) ...
+                                           * 10 / bin_size) ;
+                    end
+%                     step = 1;
+%                     time_steps = (1:1:len-start+1) .* step;
+%                     eeg = [exp(time_steps) ; eeg];
+                    
+                    x = [];
+                    for o = 0 : order
+                        starting = start - (o + 1);
+                        x = [x; ...
+                            diff(trial(tr, a).handPos(1:2,starting:end), o+1, 2)];
+                        
+                        average_state = mean(diff(trial(tr, a).handPos(1:2,1:first_t-1),o+1,2),2);
+                        state0((1:2)*(o+1), a) = state0((1:2)*(o+1), a) + average_state/n_tr;
+                    end
+                    
+                    if i_tr <= n_train
+                        eeg_train{a,i_tr,1} = eeg;
+                        x_train{a,i_tr,1} = x;
+                    else
+                        eeg_test{a,i_tr-n_train,1} = eeg;
+                        x_test{a,i_tr-n_train,1} = x;
+                    end
+                    
+                end
+            end
+            state0(1:2, :) = [];
+        end
+        
+        
         function [state0, eeg_train, eeg_test, x_train, x_test] = getDataset(~, trial, lag, percent, start)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -129,7 +307,7 @@ classdef PositionEstimator_cl
                     average_handDisp = mean(diff(trial(tr, a).handPos(1:2,1:first_t-1),1,2),2);
                     state0(:, a) = state0(:, a) + average_handDisp/n_tr;
                     
-                    eeg = trial(tr, a).spikes(:,first_t:end-lag);
+                    eeg = trial(tr, a).spikes(1:20,first_t:end-lag);
                     x = diff(trial(tr, a).handPos(1:2,start:end), 1, 2);
                     
                     if i_tr <= n_train
@@ -171,8 +349,8 @@ classdef PositionEstimator_cl
                 x = x_cell{1,tr};
                 M = size(x, 2);
                 
-                sum1 = x(:,2:M) * x(:,1:M-1)';
-                sum2 = x(:,1:M-1) * x(:,1:M-1)';
+                sum1 = sum1 + x(:,2:M) * x(:,1:M-1)';
+                sum2 = sum2 + x(:,1:M-1) * x(:,1:M-1)';
                 
             end
             
@@ -184,16 +362,18 @@ classdef PositionEstimator_cl
             
             c1 = zeros(d);
             c2 = zeros(d);
-            W = zeros(d);
+            MM = 0;
             for tr = 1:size(x_cell, 2)
                 x = x_cell{1,tr};
                 M = size(x, 2);
+                MM = MM + M - 1;
                 
-                c1 = x(:,2:M)*x(:,2:M)';
-                c2 = x(:,1:M-1)*x(:,2:M)';
+                c1 = c1 + x(:,2:M)*x(:,2:M)';
+                c2 = c2 + x(:,1:M-1)*x(:,2:M)';
                 
-                W = W + (1/(M-1))*(c1 - A*c2)./size(x_cell, 2);
+                %W = W + (1/(M-1))*(c1 - A*c2)./size(x_cell, 2);
             end
+            W = (1/MM)*(c1 - A*c2);
         end
         
         function H = calculateH(~, z_cell, x_cell)
@@ -207,8 +387,8 @@ classdef PositionEstimator_cl
                 z = z_cell{1,tr};
                 M = size(x, 2); 
                 
-                sum1 = z(:, 1:M)*x(:, 1:M)';
-                sum2 = x(:, 1:M)*x(:, 1:M)';
+                sum1 = sum1 + z(:, 1:M)*x(:, 1:M)';
+                sum2 = sum2 + x(:, 1:M)*x(:, 1:M)';
                 
             end
             
@@ -219,19 +399,22 @@ classdef PositionEstimator_cl
             d_x = size(x_cell{1,1}, 1);
             d_z = size(z_cell{1,1}, 1);
             
-%             c1 = zeros(d_z);
-%             c2 = zeros(d_x, d_z);
+            c1 = zeros(d_z);
+            c2 = zeros(d_x, d_z);
             Q = zeros(d_z);
+            MM = 0;
             for tr = 1:size(x_cell, 2)
                 x = x_cell{1,tr};
                 z = z_cell{1,tr};
                 M = size(x, 2);
+                MM = MM + M;
                 
-                c1 = z(:,1:M)*z(:,1:M)';
-                c2 = x(:,1:M)*z(:,1:M)';
+                c1 = c1 + z(:,1:M)*z(:,1:M)';
+                c2 = c2 + x(:,1:M)*z(:,1:M)';
                 
-                Q = Q + (1/M)*(c1 - H*c2)./size(x_cell, 2);
+%                 Q = Q + (1/M)*(c1 - H*c2)./size(x_cell, 2);
             end
+            Q = (1/MM)*(c1 - H*c2);
         end       
         
         function [A, W, H, Q] = computeDynamics(obj, x, z)

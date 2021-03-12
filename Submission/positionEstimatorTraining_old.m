@@ -32,17 +32,11 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   n_neighbours = 28;
   [Mdl, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);
   
-  lag = 1;
-  bin_size = 3;
-  [state0, eeg_train, ~, x_train, ~] = estimator.sayonara(training_data, lag, bin_size, 2, 100);
+  [state0, eeg_train, ~, x_train, ~] = estimator.getDataset(training_data, 10, 100);
   
   assignin('base', 'eeg_train', eeg_train);
    
   [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
-  assignin('base', 'A', A);
-  assignin('base', 'W', W);
-  assignin('base', 'H', H);
-  assignin('base', 'Q', Q);
   
   modelParameters.A = A; 
   modelParameters.W = W;
@@ -50,9 +44,7 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   modelParameters.Q = Q;
   modelParameters.classifier = Mdl;
   modelParameters.initial_params = state0;
-  modelParameters.lag = lag;
-  modelParameters.bin_size = bin_size;
   modelParameters.neurons = active_neurons;
   modelParameters.pos_estimator = estimator;
-  modelParameters.init_error_cov = ones(6,6);
+  modelParameters.init_error_cov = ones(2,2);
 end

@@ -37,8 +37,8 @@ for tr=1:size(testData,1)
     for direc=randperm(8) 
         decodedHandPos = [];
 
-        %times=320:20:size(testData(tr,direc).spikes,2);
-        times = 320;
+        times=320:20:size(testData(tr,direc).spikes,2);
+%         times = 320;
         for t=times
             past_current_trial.trialId = testData(tr,direc).trialId;
             past_current_trial.spikes = testData(tr,direc).spikes(:,1:t); 
