@@ -170,10 +170,10 @@ classdef PositionEstimator
             for tr = 1:size(x_cell, 2)
                 x = x_cell{1,tr};
                 M = size(x, 2);
-                for k = 2:M
-                    sum1 = sum1 + (x(:,k) * x(:,k-1)');
-                    sum2 = sum2 + (x(:,k-1) * x(:,k-1)');
-                end
+                
+                sum1 = x(:,2:M) * x(:,1:M-1)';
+                sum2 = x(:,1:M-1) * x(:,1:M-1)';
+                
             end
             
             A = sum1/sum2;
@@ -184,15 +184,16 @@ classdef PositionEstimator
             
             c1 = zeros(d);
             c2 = zeros(d);
+            W = zeros(d);
             for tr = 1:size(x_cell, 2)
                 x = x_cell{1,tr};
-                M = size(x, 2); 
-                for k = 2:M
-                    c1 = c1 + (x(:,k)*x(:,k)');
-                    c2 = c2 + (x(:,k-1)*x(:,k)');
-                end
+                M = size(x, 2);
+                
+                c1 = x(:,2:M)*x(:,2:M)';
+                c2 = x(:,1:M-1)*x(:,2:M)';
+                
+                W = W + (1/(M-1))*(c1 - A*c2)./size(x_cell, 2);
             end
-            W = (1/(M-1))*(c1 - A*c2);
         end
         
         function H = calculateH(~, z_cell, x_cell)
@@ -205,10 +206,10 @@ classdef PositionEstimator
                 x = x_cell{1,tr};
                 z = z_cell{1,tr};
                 M = size(x, 2); 
-                for k = 1:M
-                    sum1 = sum1 + (z(:, k)*x(:, k)');
-                    sum2 = sum2 + (x(:, k)*x(:, k)');
-                end
+                
+                sum1 = z(:, 1:M)*x(:, 1:M)';
+                sum2 = x(:, 1:M)*x(:, 1:M)';
+                
             end
             
             H = sum1/sum2;
@@ -220,16 +221,17 @@ classdef PositionEstimator
             
             c1 = zeros(d_z);
             c2 = zeros(d_x, d_z);
+            Q = zeros(d_z);
             for tr = 1:size(x_cell, 2)
                 x = x_cell{1,tr};
                 z = z_cell{1,tr};
                 M = size(x, 2);
-                for k = 2:M
-                    c1 = c1 + (z(:,k)*z(:,k)');
-                    c2 = c2 + (x(:,k)*z(:,k)');
-                end
+                
+                c1 = z(:,1:M)*z(:,1:M)';
+                c2 = x(:,1:M)*z(:,1:M)';
+                
+                Q = Q + (1/M)*(c1 - H*c2)./size(x_cell, 2);
             end
-            Q = (1/M)*(c1 - H*c2);
         end       
         
         function [A, W, H, Q] = computeDynamics(obj, x, z)
