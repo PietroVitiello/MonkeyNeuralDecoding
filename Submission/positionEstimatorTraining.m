@@ -24,16 +24,15 @@ function [modelParameters] = positionEstimatorTraining(training_data)
  
   silent_neurons = [8 10 11 38 49 52 73 74 76]; 
   %9 neurons with the least firing across trials and angles
-  whos training_data
   clean_trial = processor.clean_dataset(training_data, silent_neurons);
-  whos clean_trial
-  whos training_data
   %Silent neurons are cleared out of the training data
   
   neurons_per_angle = 9;
   active_neurons = processor.mostActive(clean_trial, neurons_per_angle); 
   %Most active neurons across trials and angles
-  [samples, labels] = processor.create_dataset(training_data, active_neurons); 
+  [samples, labels] = processor.create_dataset(training_data, active_neurons);
+  whos samples
+  whos labels
   %Sample & label dataset is created to build a K-nearest neighbours
   %classifier
   
@@ -42,9 +41,13 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   %Mdl contains the parameters of the classifier
   
   [state0, eeg_train, ~, x_train, ~] = estimator.getDataset(training_data, 1, 100);
-  % state0
+  %state0 is the average velocity of the hand during the 300ms prior to the
+  %movement; eeg_train is the training dataset of spike trains from 300 ms
+  %onwards; x_train is the training dataset of hand velocity from 300 ms
+  %onwards
    
   [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
+  %A, W, H, Q are the Kalman filter matrices
   
   modelParameters.A = A; 
   modelParameters.W = W;

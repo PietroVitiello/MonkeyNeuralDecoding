@@ -175,7 +175,6 @@ classdef PositionEstimator_cl
                     sum2 = sum2 + (x(:,k-1) * x(:,k-1)');
                 end
             end
-            
             A = sum1/sum2;
         end
         
@@ -234,6 +233,8 @@ classdef PositionEstimator_cl
                     c1 = c1 + (z(:,k)*z(:,k)');
                     c2 = c2 + (x(:,k)*z(:,k)');
                 end
+                c1 = 1/(M-1)*c1;
+                c2 = 1/(M-1)*c2;
             end
             Q = (1/MM)*(c1 - H*c2);
         end       
