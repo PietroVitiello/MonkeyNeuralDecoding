@@ -136,6 +136,8 @@ classdef Processing
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %}
             dataset = zeros(size(trial,1)*size(trial,2), length(active_neurons)+1);
+            %dataset is a matrix, the rows represent trials and the columns
+            %represent the active neurons
             length_premotor = 320;
             traj_count = 0;
             for angle_n = 1:size(trial,2)
@@ -144,14 +146,25 @@ classdef Processing
                     temp = zeros(1, length(active_neurons));
                     for neuron_n = 1:length(active_neurons)
                         temp(neuron_n) = sum(trial(trial_n, angle_n).spikes(active_neurons(neuron_n), 1:length_premotor));
+                        %Spikes are summed for each angle, trial and neuron
+                        %in the first 320ms of each spike train ("premotor"
+                        %window
                         temp(length(active_neurons)+1) = angle_n;
+                        %The angle corresponding to a given trial is also
+                        %recorded and added at the end of the row
                     end
                 dataset(traj_count, :) = temp;
                 end
             end
             rand_d = dataset(randperm(size(dataset, 1)), :);
+            %The rows of the dataset are randomised to alternate trials of
+            %different angles
             samples = rand_d(:, 1:length(active_neurons));
+            %samples is a matrix containing spikes summed across time, the
+            %rows represent trials and the columns represent active neurons 
             labels = rand_d(:, length(active_neurons)+1);
+            %labels is a matrix containing the angles of reference for each
+            %trial, the rows represent the trials
         end
         
         
