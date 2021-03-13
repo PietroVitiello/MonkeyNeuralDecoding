@@ -147,6 +147,15 @@ classdef PositionEstimator_cl
             end    
         end
         
+        function [eeg_train] = non_redundant(~, eeg_train, neurons_estimator)
+            for angle_n = 1:size(eeg_train, 1)
+                for trial_n = 1:size(eeg_train, 2)
+                    temp = eeg_train{angle_n, trial_n};
+                    eeg_train{angle_n, trial_n} = temp(neurons_estimator(:, angle_n), :);
+                end
+            end
+        end
+        
         function A = calculateA(~, x_cell)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
