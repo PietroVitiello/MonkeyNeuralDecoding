@@ -32,13 +32,13 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   
   lag = modelParameters.lag;
   bin_size = modelParameters.bin_size;
-  usable_data = estimator.apply_dataset(spikes, lag, bin_size);
+  usable_data = estimator.apply_dataset_coala(spikes, lag, bin_size);
   
   for i = 1 : size(usable_data, 2)
       obs = usable_data(:, i);
       [init_x, init_P] = estimator.update(A, init_x, H, Q, W, init_P, obs);
-      x = x + init_x(3);
-      y = y + init_x(4);
+      x = x + (init_x(3) * bin_size);
+      y = y + (init_x(4) * bin_size);
   end
   
   modelParameters.init_x = init_x;

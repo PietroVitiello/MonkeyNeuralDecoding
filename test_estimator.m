@@ -15,3 +15,6 @@ di = diff(lista, 0, 2)
 
 %% Testing more complex way to generate dataset
 [state0, eeg_train, eeg_test, x_train, x_test] = estimator.sayonara(trial, 4, 5, 3, 80);
+
+%% Testing average bins
+[state0, eeg_train, eeg_test, x_train, x_test] = estimator.ferromagnetico(trial, 4, 5, 3, 80);
