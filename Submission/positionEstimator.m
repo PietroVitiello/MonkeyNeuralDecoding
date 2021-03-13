@@ -30,7 +30,7 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   
   for i = length_all-20:length_all
       obs = spikes(modelParameters.neurons_estimator(:, modelParameters.angle_n), i);
-      %size(obs)
+      size(obs)
       [init_x, init_P] = estimator.update(A, init_x, H, Q, W, init_P, obs);
       x = x + init_x(1);
       y = y + init_x(2);

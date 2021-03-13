@@ -9,18 +9,14 @@ classdef Processing
         function trial = clean_dataset(~, trial, silent_neurons)
         %{
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
         The purpose of this function is to create a data matrix of structs 
         containing only neurons with a substantial firing rate across
         trials and angles
-
         -input
         trial: data as a matrix of structs
         silent_neurons: list of 9 most silent neurons
-
         -output
         trial: data as a matrix of structs
-
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %}
             for angle_n = 1:size(trial, 2)

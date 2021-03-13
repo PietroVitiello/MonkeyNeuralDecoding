@@ -10,7 +10,7 @@ classdef PositionEstimator_cl
             x_pred = A*x_prev;
             P_pred = A*P_prev*A' + R;
             
-            M = inv(H*P_pred*H' + Q);
+            M = inv(H*P_pred*H' + Q)
             K_gain = (P_pred*H')/(H*P_pred*H' + Q);
             x_estim = x_pred + K_gain*(obs - H*x_pred);
             P_estim = (eye(size(x_prev, 1), size(x_prev, 1)) - K_gain*H)*P_pred;
@@ -291,9 +291,7 @@ classdef PositionEstimator_cl
                 end
                 
                 A = cat(3, A, A_sum1/A_sum2);
-                %A = (1/size(x_cell, 2))*cat(3, A, A_sum1/A_sum2);
                 H = cat(3, H, H_sum1/H_sum2);
-                %H = (1/size(x_cell, 2))*cat(3, H, H_sum1/H_sum2);
                 
                 for tr = 1:size(x_cell, 2)
                     M = size(x_cell{a,tr}, 2);
@@ -313,9 +311,7 @@ classdef PositionEstimator_cl
                     Q_temp = Q_temp + ((1/M)*(Q_sum1 - H(:,:,end)*Q_sum2)./size(x_cell, 2));
                 end
                 W = cat(3, W, W_temp);
-                %W = (1/size(x_cell, 2))*cat(3, W, W_temp);
                 Q = cat(3, Q, Q_temp);
-                %Q = (1/size(x_cell, 2))*cat(3, Q, Q_temp);
                 
             end
         end
