@@ -4,10 +4,8 @@ load monkeydata_training
 estimator = PositionEstimator();
 
 %%
-lista = 1:300;
-len = size(lista, 2);
-ciak = lista(270-3:end-3)
-lista(len);
+lista = 1:10;
+di = diff(lista, 0, 2)
 
 %% Testing dataset creation function
 [state0, eeg_train, eeg_test, x_train, x_test] = estimator.getDataset(trial, 1, 80);
