@@ -41,15 +41,19 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   %Mdl contains the parameters of the classifier
   
   neurons_per_angle = 3;
-  neurons_estimator = processor.mostActive(clean_trial, neurons_per_angle, 300, 571); 
- 
+  neurons_estimator = processor.mostActive(clean_trial, neurons_per_angle, 300, 571, 'vector'); 
+  neurons_estimator_matrix = zeros(length(neurons_estimator), size(training_data,2));
+  for angle_n = 1:size(training_data,2)
+      neurons_estimator_matrix(:, angle_n) = neurons_estimator';
+  end
+  
   [state0, eeg_train, ~, x_train, ~] = estimator.getDataset(training_data, 1, 100);
   %state0 is the average velocity of the hand during the 300ms prior to the
   %movement; eeg_train is the training dataset of spike trains from 300 ms
   %onwards; x_train is the training dataset of hand velocity from 300 ms
   %onwards
   
-  eeg_train = estimator.non_redundant(eeg_train, neurons_estimator);
+  eeg_train = estimator.non_redundant(eeg_train, neurons_estimator_matrix);
    
   [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
   %A, W, H, Q are the Kalman filter matrices
@@ -61,7 +65,7 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   modelParameters.classifier = Mdl;
   modelParameters.initial_params = state0;
   modelParameters.neurons_classifier = neurons_classifier;
-  modelParameters.neurons_estimator = neurons_estimator;
+  modelParameters.neurons_estimator = neurons_estimator_matrix;
   modelParameters.pos_estimator = estimator;
   modelParameters.init_error_cov = ones(2,2);
 end

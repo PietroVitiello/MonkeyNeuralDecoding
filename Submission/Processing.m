@@ -37,7 +37,7 @@ classdef Processing
         
         
         
-        function active_neurons = mostActive(~, trial, n, lower_bound, upper_bound)
+        function active_neurons = mostActive(~, trial, n, lower_bound, upper_bound, mode)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -60,11 +60,13 @@ classdef Processing
             
             if nargin < 4
                 lower_bound = 1;
+                mode = 'vector';
             end
             if nargin < 5
                 upper_bound = 320;
+                mode = 'vector';
             end
-            
+
             window = lower_bound : upper_bound;
             %window contains the time instants prior to the onset
             %of movement (hence premotor)
@@ -88,11 +90,10 @@ classdef Processing
             %angle and the neurons are ordered from the highest to lowest
             %time-averaged firing rate
             
-            if nargin > 4
+            if (nargin > 4) && (strcmp(mode, 'matrix'))
                 active_neurons = all_active_neurons(1:n, :);
-            end
             
-            if nargin < 4
+            else
                 active_neurons = [];
                 col = 1;
                 row = 1;

@@ -11,8 +11,8 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
       angle_n = predict(modelParameters.classifier, init_spikes');
       init_x = modelParameters.initial_params(:, angle_n);
       init_P = modelParameters.init_error_cov;
-      x = test_data.startHandPos(1);
-      y = test_data.startHandPos(2);
+      x = test_data.startHandPos(1) + init_x(1);
+      y = test_data.startHandPos(2) + init_x(2);
       modelParameters.angle_n = angle_n;
   else
       init_x = modelParameters.init_x;
