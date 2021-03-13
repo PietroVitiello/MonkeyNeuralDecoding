@@ -41,11 +41,20 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   %Mdl contains the parameters of the classifier
   
   neurons_per_angle = 3;
-  neurons_estimator = processor.mostActive(clean_trial, neurons_per_angle, 300, 571, 'vector'); 
-  neurons_estimator_matrix = zeros(length(neurons_estimator), size(training_data,2));
-  for angle_n = 1:size(training_data,2)
-      neurons_estimator_matrix(:, angle_n) = neurons_estimator';
+  mode = 'vector';
+  if strcmp(mode, 'vector')
+      neurons_estimator = processor.mostActive(clean_trial, neurons_per_angle, 300, 571, mode);
+      neurons_estimator_matrix = zeros(length(neurons_estimator), size(training_data,2));
+      for angle_n = 1:size(training_data,2)
+          neurons_estimator_matrix(:, angle_n) = neurons_estimator';
+      end
   end
+  if strcmp(mode, 'matrix')
+      neurons_estimator_matrix = processor.mostActive(clean_trial, neurons_per_angle, 300, 571, mode);
+  end
+  %Most active neurons: 
+  % - across trials and angles if the mode is 'vector'
+  % - across trials, per angle if the mode is 'matrix'
   
   [state0, eeg_train, ~, x_train, ~] = estimator.getDataset(training_data, 1, 100);
   %state0 is the average velocity of the hand during the 300ms prior to the
