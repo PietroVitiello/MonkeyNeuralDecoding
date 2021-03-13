@@ -148,6 +148,15 @@ classdef PositionEstimator_cl
             end    
         end
         
+        function [eeg_train] = non_redundant(~, eeg_train, neurons_estimator)
+            for angle_n = 1:size(eeg_train, 1)
+                for trial_n = 1:size(eeg_train, 2)
+                    temp = eeg_train{angle_n, trial_n};
+                    eeg_train{angle_n, trial_n} = temp(neurons_estimator(:, angle_n), :);
+                end
+            end
+        end
+        
         function A = calculateA(~, x_cell)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -238,9 +247,76 @@ classdef PositionEstimator_cl
                 c2 = 1/(M-1)*c2;
             end
             Q = (1/MM)*(c1 - H*c2);
-        end       
+        end   
         
-        function [A, W, H, Q] = computeDynamics(obj, x, z)
+         function [A, W, H, Q] = computeDynamics(~, x_cell, z_cell)
+            
+            A = [];
+            W = [];
+            H = [];
+            Q = [];
+            
+            d_x = size(x_cell{1,1}, 1);
+            d_z = size(z_cell{1,1}, 1);
+            
+            
+            for a = 1:size(x_cell)
+                
+                A_sum1 = zeros(d_x);
+                A_sum2 = zeros(d_x);
+                W_sum1 = zeros(d_x);
+                W_sum2 = zeros(d_x);
+                H_sum1 = zeros(d_z, d_x);
+                H_sum2 = zeros(d_x);
+                Q_sum1 = zeros(d_z);
+                Q_sum2 = zeros(d_x, d_z);
+                
+                W_temp = zeros(d_x);
+                Q_temp = zeros(d_z);
+                
+                for tr = 1:size(x_cell, 2)
+                    M = size(x_cell{a,tr}, 2);
+                    
+                    x1 = x_cell{a,tr}(:,1:M-1);
+                    x2 = x_cell{a,tr}(:,2:M);
+                    x11 = x_cell{a,tr}(:,1:M);
+                    z11 = z_cell{a,tr}(:,1:M);
+
+                    A_sum1 = A_sum1 + x2 * x1';
+                    A_sum2 = A_sum2 + x1 * x1';
+                    
+                    H_sum1 = H_sum1 + z11 * x11';
+                    H_sum2 = H_sum2 + x11 * x11';
+                    
+                end
+                
+                A = cat(3, A, A_sum1/A_sum2);
+                H = cat(3, H, H_sum1/H_sum2);
+                
+                for tr = 1:size(x_cell, 2)
+                    M = size(x_cell{a,tr}, 2);
+                    
+                    x1 = x_cell{a,tr}(:,1:M-1);
+                    x2 = x_cell{a,tr}(:,2:M);
+                    x11 = x_cell{a,tr}(:,1:M);
+                    z11 = z_cell{a,tr}(:,1:M);
+                    
+                    W_sum1 = W_sum1 + x2 * x2';
+                    W_sum2 = W_sum2 + x1 * x2';
+                    
+                    Q_sum1 = Q_sum1 + z11 * z11';
+                    Q_sum2 = Q_sum2 + x11 * z11';
+                    
+                    W_temp = W_temp + ((1/M)*(W_sum1 - A(:,:,end)*W_sum2)./size(x_cell, 2));
+                    Q_temp = Q_temp + ((1/M)*(Q_sum1 - H(:,:,end)*Q_sum2)./size(x_cell, 2));
+                end
+                W = cat(3, W, W_temp);
+                Q = cat(3, Q, Q_temp);
+                
+            end
+        end
+        
+        function [A, W, H, Q] = computeDynamics_(obj, x, z)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             

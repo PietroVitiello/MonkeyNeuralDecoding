@@ -37,7 +37,7 @@ classdef Processing
         
         
         
-        function active_neurons = mostActive(~, trial, n, lower_bound, upper_bound)
+        function active_neurons = mostActive(~, trial, n, lower_bound, upper_bound, mode)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -58,15 +58,17 @@ classdef Processing
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %}
             
-            if nargin < 5
-                lower_bound = 1;
-            end
             if nargin < 4
-                upper_bound = 320;
+                lower_bound = 1;
+                mode = 'vector';
             end
-            
-            pre_motor_window = lower_bound : upper_bound;
-            %pre_motor_window contains the time instants prior to the onset
+            if nargin < 5
+                upper_bound = 320;
+                mode = 'vector';
+            end
+
+            window = lower_bound : upper_bound;
+            %window contains the time instants prior to the onset
             %of movement (hence premotor)
 
             average_spike_trains = zeros(size(trial(1,1).spikes, 1), size(trial, 2));
@@ -76,7 +78,7 @@ classdef Processing
 
             for angle_n = 1:size(trial, 2)
                 for i = 1:size(trial, 1)
-                    average_spike_trains(:,angle_n) = average_spike_trains(:,angle_n) + mean(trial(i, angle_n).spikes(:, 1:pre_motor_window), 2);
+                    average_spike_trains(:,angle_n) = average_spike_trains(:,angle_n) + mean(trial(i, angle_n).spikes(:, 1:window), 2);
                     %The mean is computed across time in the premotor
                     %window and is then summed across trials, for each
                     %neuron
@@ -88,30 +90,34 @@ classdef Processing
             %angle and the neurons are ordered from the highest to lowest
             %time-averaged firing rate
             
-            active_neurons = [];
-            col = 1;
-            row = 1;
+            if (nargin > 4) && (strcmp(mode, 'matrix'))
+                active_neurons = all_active_neurons(1:n, :);
             
-            while length(active_neurons) < n*size(all_active_neurons, 2)
-            %active_neurons must be n*8 elements long 
-                temp = all_active_neurons(row, col);
-                
-                if isempty(find(active_neurons == temp, 1))
-                    active_neurons = [active_neurons temp];
-                    %If the temp neuron is not contained in the 
-                    %active_neurons list, it is added to it
-                    
-                    if length(active_neurons) == col*n
-                        col = col + 1;
-                        row = 0;
-                        %The ordered firing rates matrix is searched row by
-                        %row (i.e. the whole top row -> the whole second
-                        %row etc.)
+            else
+                active_neurons = [];
+                col = 1;
+                row = 1;
+
+                while length(active_neurons) < n*size(all_active_neurons, 2)
+                %active_neurons must be n*8 elements long 
+                    temp = all_active_neurons(row, col);
+
+                    if isempty(find(active_neurons == temp, 1))
+                        active_neurons = [active_neurons temp];
+                        %If the temp neuron is not contained in the 
+                        %active_neurons list, it is added to it
+
+                        if length(active_neurons) == col*n
+                            col = col + 1;
+                            row = 0;
+                            %The ordered firing rates matrix is searched row by
+                            %row (i.e. the whole top row -> the whole second
+                            %row etc.)
+                        end
                     end
+                    row = row + 1;
                 end
-                
-                row = row + 1;
-            end 
+            end
         end
         
         

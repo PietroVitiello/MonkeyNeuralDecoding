@@ -4,7 +4,7 @@
 % the relevant modelParameters, and then calls the function
 % "positionEstimator" to decode the trajectory. 
 
-function RMSE = testFunction_for_students_MTb(teamName)
+function RSEM = testFunction_for_students_MTb(teamName)
 
 load monkeydata0
 
@@ -38,7 +38,6 @@ for tr=1:size(testData,1)
         decodedHandPos = [];
         
         times=320:20:size(testData(tr,direc).spikes,2);
-        %times = 320;
         for t=times
             past_current_trial.trialId = testData(tr,direc).trialId;
             past_current_trial.spikes = testData(tr,direc).spikes(:,1:t);
