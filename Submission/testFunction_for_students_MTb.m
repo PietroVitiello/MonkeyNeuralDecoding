@@ -41,7 +41,10 @@ for tr=1:size(testData,1)
         % times = 320;
         for t=times
             past_current_trial.trialId = testData(tr,direc).trialId;
-            past_current_trial.spikes = testData(tr,direc).spikes(:,1:t); 
+            past_current_trial.spikes = testData(tr,direc).spikes(:,1:t);
+            %%%%
+            past_current_trial.spikes = past_current_trial.spikes + 1
+            %%%%
             past_current_trial.decodedHandPos = decodedHandPos;
 
             past_current_trial.startHandPos = testData(tr,direc).handPos(1:2,1); 

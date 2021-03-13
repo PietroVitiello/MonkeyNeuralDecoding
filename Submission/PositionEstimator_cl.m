@@ -10,7 +10,8 @@ classdef PositionEstimator_cl
             x_pred = A*x_prev;
             P_pred = A*P_prev*A' + R;
             
-            K_gain = P_pred*H'/(H*P_pred*H' + Q);
+            M = inv(H*P_pred*H' + Q)
+            K_gain = (P_pred*H')/(H*P_pred*H' + Q);
             x_estim = x_pred + K_gain*(obs - H*x_pred);
             P_estim = (eye(size(x_prev, 1), size(x_prev, 1)) - K_gain*H)*P_pred;
         end
