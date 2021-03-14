@@ -40,15 +40,16 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   [Mdl, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);
   %Mdl contains the parameters of the classifier
   
-  neurons_per_angle = 1;
-  mode = 'matrix';
+  % TODO (for this section): find minimum length (not just write it)
+  neurons_per_angle = 6;
+  mode = 'vector';
   if strcmp(mode, 'matrix')
       neurons_estimator_matrix = processor.mostActive(clean_trial, neurons_per_angle, 300, 571, mode);
   end
   if strcmp(mode, 'vector')
       neurons_estimator = processor.mostActive(clean_trial, neurons_per_angle, 300, 571, mode); 
       neurons_estimator_matrix = zeros(length(neurons_estimator), size(training_data,2));
-      for angle_n = 1:size(training_data,2)
+      for angle_n = 1:size(training_data, 2)
           neurons_estimator_matrix(:, angle_n) = neurons_estimator';
       end
   end
@@ -58,9 +59,10 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   %movement; eeg_train is the training dataset of spike trains from 300 ms
   %onwards; x_train is the training dataset of hand velocity from 300 ms
   %onwards
-  
+    
   eeg_train = estimator.non_redundant(eeg_train, neurons_estimator_matrix);
-   
+  [eeg_train, x_train] = processor.get_average_data(eeg_train, x_train);
+  
   [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
   %A, W, H, Q are the Kalman filter matrices
   

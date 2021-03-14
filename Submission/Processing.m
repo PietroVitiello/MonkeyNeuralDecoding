@@ -197,6 +197,53 @@ classdef Processing
             end
         end
         
+
+        function [firing_rates, av_labels] =  get_average_data(~,eeg_train, x_train)
+            max_lengths = zeros(size(eeg_train,1), 1);
+            for angle_n = 1:size(eeg_train, 1)
+                max_ = -Inf;
+                for trial_n = 1:size(eeg_train, 2)
+                    if size(eeg_train{angle_n, trial_n},2) > max_
+                        max_ = size(eeg_train{angle_n, trial_n},2);
+                    end
+                end
+                max_lengths(angle_n) = max_;
+            end
+     
+            firing_rates = cell(size(eeg_train,1), 1);
+            av_labels = cell(size(x_train,1), 1);
+            for angle_n = 1:size(eeg_train,1)
+                fr_angle = zeros(size(eeg_train{angle_n, 1}, 1), max_lengths(angle_n));
+                labels_angle = zeros(size(x_train{angle_n, 1}, 1), max_lengths(angle_n));
+                for timebin = 1:max_lengths(angle_n)
+                    fr_temp = zeros(size(eeg_train{angle_n, 1}, 1), 1);
+                    fr_dividend = size(eeg_train,2);
+                    if timebin <= max_lengths(angle_n)-1
+                        label_temp = zeros(size(x_train{angle_n, 1}, 1), 1);
+                        label_dividend = size(x_train, 2);
+                    end
+                    for trial_n = 1:size(eeg_train, 2)
+                        if size(eeg_train{angle_n, trial_n}, 2) >= timebin
+                            fr_temp = fr_temp + eeg_train{angle_n, trial_n}(:, timebin);
+                        else
+                            fr_dividend = fr_dividend - 1;
+                        end
+                        if size(x_train{angle_n, trial_n}, 2) >= timebin
+                            label_temp = label_temp + x_train{angle_n, trial_n}(:, timebin);
+                        else
+                            label_dividend = label_dividend -1;
+                        end
+                    end
+                    fr_angle(:, timebin) = fr_temp./fr_dividend;
+                    if timebin <= max_lengths(angle_n)-1
+                        labels_angle(:, timebin) = label_temp./label_dividend;
+                    end
+                end
+                firing_rates{angle_n} = fr_angle;
+                av_labels{angle_n} = labels_angle;
+            end
+        end
+        
         
         function mx = switchDim(~, input)
             
