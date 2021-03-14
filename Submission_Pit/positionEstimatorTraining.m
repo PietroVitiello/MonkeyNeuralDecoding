@@ -32,9 +32,9 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   n_neighbours = 28;
   [Mdl, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);
   
-  lag = 0;
+  lag = 5;
   bin_size = 5;
-  [state0, eeg_train, ~, x_train, ~] = estimator.ferromagnetico(training_data, lag, bin_size, 2, 100);
+  [state0, eeg_train, ~, x_train, ~] = estimator.ferromagnetico(training_data, lag, bin_size, 1, 100);
   
   assignin('base', 'eeg_train', eeg_train);
    

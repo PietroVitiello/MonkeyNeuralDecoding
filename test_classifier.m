@@ -69,7 +69,7 @@ covariance_matrix = processor.covariance(train_mx, 1)
 %% Multidimensional MLE
 silent_neuron = [8 10 11 38 49 52 73 74 76];
 clean_trial = processor.clean_dataset(trial, silent_neuron);
-active_neurons = processor.mostActive(clean_trial, 1);
+active_neurons = processor.mostActive(clean_trial, 9);
 
 [train_mx, test_mx] = processor.data_as_matrix(clean_trial, active_neurons, 90);
 
