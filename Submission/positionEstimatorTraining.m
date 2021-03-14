@@ -40,7 +40,7 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   [Mdl, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);
   %Mdl contains the parameters of the classifier
   
-  neurons_per_angle = 1;
+  neurons_per_angle = 8;
   mode = 'matrix';
   if strcmp(mode, 'matrix')
       neurons_estimator_matrix = processor.mostActive(clean_trial, neurons_per_angle, 300, 571, mode);
