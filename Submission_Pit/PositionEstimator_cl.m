@@ -10,86 +10,117 @@ classdef PositionEstimator_cl
             x_pred = A*x_prev;
             P_pred = A*P_prev*A' + R;
             
-            K_gain = P_pred*H'*(inv(H*P_pred*H' + Q));
+            K_gain = P_pred*H'*(pinv(H*P_pred*H' + Q));
             x_estim = x_pred + K_gain*(obs - H*x_pred);
             P_estim = (eye(size(x_prev, 1)) - K_gain*H)*P_pred;
         end
         
-        function [x_train, x_test] = getLabels(~, trial, delta, percent, win_size, deriv, start)
+        function usable_data = apply_ferromagnetico(~, data, lag, bin_size)
+            
+            [n_n, len] = size(data);
+            first_t = len - 19 - lag;
+            n_bin = floor((len-first_t) / bin_size);
+            bin_starts = first_t: bin_size: (first_t+(n_bin-1)*bin_size);
+            
+            usable_data = zeros(n_n+1, n_bin);
+            for i = 1:n_bin
+                usable_data(2:end, i) = mean(data(:,bin_starts(i):bin_starts(i)+bin_size-1),2);
+            end
+            usable_data = [bin_starts; usable_data];
+            
+        end
+        
+        function [state0, eeg_train, eeg_test, x_train, x_test] = ferromagnetico(~, trial, lag, bin_size, order, percent, start)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
-            The purpose of this function is to create the training and
-            testing datasets both for stimulus and labels. The datasets are
-            created without separating between trials and with random
-            permutation of the millisecond recordings
+            Return state0 and the different datasets where the rows from the
+            second to the last of eeg represent each one neuron and each
+            column is the average firing rate in a ceratin bin (which
+            depends on the bin_size). The labels are the position and any
+            order of derivation of it, and they are as well the mean of the
+            labels in the bins (apart from the position which has been
+            taken as the last position of the bin).
             
             -input
             trial: the given struct
             delta: time lag between stimulus and label in ms
+            bin_size: size of the bins (should be a factor of 20 otherwise
+                      things might get messy)
+            order: derivative order of the position
             percent: percentage of training data
             start: to which sample start (optional)
             
             -output
-            x_train: 2*(deriv+1) x (total time steps) labels signal for training
-            x_test: 2*(deriv+1) x (total time steps) labels for testing
+            state0: initial set of labels (apart from position)
+            eeg_train: stimulus signal for training
+            eeg_test: stimulus signal for testing
+            x_train: labels signal for training
+            x_test: labels for testing
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %}
             
             if nargin < 7
-                start = 1;
-            end
-            if nargin < 6
-                deriv = 1;
-            end
-            if nargin < 5
-                win_size = 1;
+                start = 301;
             end
             
-            first_t = start + delta;
+            first_t = start - lag;
             [n_tr, n_a] = size(trial); % #trials, #angles
+            n_n = size(trial(1,1).spikes, 1); % #neurons
             
-            eeg_train = cell(n_a, 1);
-            x_train = cell(n_a, 1);
-            eeg_test = cell(n_a, 1);
-            x_test = cell(n_a, 1);
+            rand_id = randperm(n_tr);
+            n_train = floor(percent * n_tr / 100);
+            n_test = n_tr-n_train;
             
-            eeg = [];
-            x = [];
+            state0 = zeros(2*order, n_a);
+            eeg_train = cell(n_a, n_train, 1);
+            x_train = cell(n_a, n_train, 1);
+            eeg_test = cell(n_a, n_test, 1);
+            x_test = cell(n_a, n_test, 1);
+            
             for a = 1:n_a
-                for tr = 1:n_tr
-                    for t = first_t:size(trial(tr,a).spikes, 2)
-                        eeg = [eeg trial(tr, a).spikes(:,t-delta)];
-                        hand_disp = trial(tr, a).handPos(1:2,t)-trial(tr, a).handPos(1:2,t-1);
-                        x = [x hand_disp];
+                for i_tr = 1:n_tr
+                    tr = rand_id(i_tr);
+                    len = size(trial(tr, a).spikes, 2);
+                    n_bin = floor((len-start) / bin_size);
+                    bin_starts = start: bin_size: (start+(n_bin-1)*bin_size);
+                    
+                    eeg = zeros(n_n+1, n_bin);
+                    for i = 1:n_bin
+                        eeg(2:end, i) = mean(trial(tr, a).spikes(:,bin_starts(i)-lag:bin_starts(i)+bin_size-1-lag),2);
                     end
+                    eeg = [bin_starts; eeg];
+                    
+                    x = trial(tr, a).handPos(1:2,bin_starts+(bin_size - 1));
+                    for o = 1 : order
+                        x_temp = [];
+                        for i = 1:n_bin
+                            starting = bin_starts(i) - o;
+                            x_temp = [x_temp, ...
+                                      mean(diff(trial(tr, a).handPos(1:2,starting:...
+                                      (bin_starts(i)+bin_size-1)), o, 2),2)];
+                        end
+                        
+                        x = [x; x_temp];
+                        
+                        average_state = mean(diff(trial(tr, a).handPos(1:2,1:first_t-1),o,2),2);
+                        state0((1:2)*o, a) = state0((1:2)*o, a) + average_state/n_tr;
+                    end
+                    
+                    if i_tr <= n_train
+                        eeg_train{a,i_tr,1} = eeg;
+                        x_train{a,i_tr,1} = x;
+                    else
+                        eeg_test{a,i_tr-n_train,1} = eeg;
+                        x_test{a,i_tr-n_train,1} = x;
+                    end
+                    
                 end
-                
-                n_train = floor(percent * size(eeg,2) / 100);
-                rand_id = randperm(size(eeg,2));
-                
-                eeg_train{a,1} = eeg(:, rand_id(1:n_train));
-                eeg_test{a,1} = eeg(:, rand_id(n_train+1:end));
-                x_train{a,1} = x(:, rand_id(1:n_train));
-                x_test{a,1} = x(:, rand_id(n_train+1:end));
-
-                eeg = [];
-                x = [];
-            end    
-            
-            
+            end
         end
         
-        
-        
-        
-        
-        
-        
-        
-        
-        function usable_data = apply_dataset(~, data, lag, bin_size)
+        function usable_data = apply_sayonara_2(~, data, lag, bin_size)
             
             [n_n, len] = size(data);
             first_t = len - 19 - lag;
@@ -103,91 +134,6 @@ classdef PositionEstimator_cl
 %                 usable_data = usable_data + ...
                 usable_data(2:2:rows, :) = usable_data(2:2:rows, :) + ...
                                            (data(:,(first_t-history):(end-lag-history)) ...
-                                           * 10 / bin_size);
-            end
-%             step = 1;
-%             time_steps = (first_t:1:first_t+19).*step;
-%             usable_data = [exp(time_steps) ; usable_data];
-        end
-        
-        function [state0, eeg_train, eeg_test, x_train, x_test] = ferromagnetico(~, trial, lag, bin_size, order, percent, start)
-            if nargin < 7
-                start = 301;
-            end
-            
-            first_t = start - lag;
-            [n_tr, n_a] = size(trial); % #trials, #angles
-            n_n = size(trial(1,1).spikes, 1); % #neurons
-            
-            rand_id = randperm(n_tr);
-            n_train = floor(percent * n_tr / 100);
-            n_test = n_tr-n_train;
-            
-            state0 = zeros(2*(order+1), n_a);
-            eeg_train = cell(n_a, n_train, 1);
-            x_train = cell(n_a, n_train, 1);
-            eeg_test = cell(n_a, n_test, 1);
-            x_test = cell(n_a, n_test, 1);
-            
-            for a = 1:n_a
-                for i_tr = 1:n_tr
-                    tr = rand_id(i_tr);
-                    len = size(trial(tr, a).spikes, 2);
-                    n_bin = floor(len / bin_size);
-                    bin_starts = first_t: bin_size: len;
-                    
-                    eeg = zeros(n_n, n_bin);
-                    eeg(1:2:rows, :) = trial(tr, a).spikes(:,first_t:end-lag);
-                    for i = 1:length(bin_starts)
-                        eeg(:, i) = mean(trial(tr, a).spikes(:,bin_starts(i):bin_starts(i)+bin_size-1));
-                    end
-                    
-                    x = [];
-                    for o = 1 : order
-                        starting = start - (o + 1);
-                        x = [x; ...
-                            diff(trial(tr, a).handPos(1:2,starting:end), o+1, 2)];
-                        
-                        average_state = mean(diff(trial(tr, a).handPos(1:2,1:first_t-1),o+1,2),2);
-                        state0((1:2)*(o+1), a) = state0((1:2)*(o+1), a) + average_state/n_tr;
-                    end
-                    
-                    if i_tr <= n_train
-                        eeg_train{a,i_tr,1} = eeg;
-                        x_train{a,i_tr,1} = x;
-                    else
-                        eeg_test{a,i_tr-n_train,1} = eeg;
-                        x_test{a,i_tr-n_train,1} = x;
-                    end
-                    
-                end
-            end
-            state0(1:2, :) = [];
-        end
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        function usable_data = apply_dataset___(~, data, lag, bin_size)
-            
-            [n_n, len] = size(data);
-            first_t = len - 19 - lag;
-            
-            rows = n_n*2;
-%             usable_data = zeros(rows, 20);
-            usable_data = zeros(n_n, 20);
-%             usable_data(1:2:rows, :) = data(:,first_t:end-lag);
-            for history = 1:bin_size
-%                 usable_data(2:2:rows, :) = usable_data(2:2:rows, :) + ...
-                usable_data = usable_data + ...
-                                           (data(:,(first_t-history):(end-lag-history)) ...
                                            * 10 / 2^(history));
             end
             step = 1;
@@ -195,7 +141,37 @@ classdef PositionEstimator_cl
             usable_data = [exp(time_steps) ; usable_data];
         end
         
-        function [state0, eeg_train, eeg_test, x_train, x_test] = sayonara___(~, trial, lag, bin_size, order, percent, start)
+        function [state0, eeg_train, eeg_test, x_train, x_test] = sayonara_2(~, trial, lag, bin_size, order, percent, start)
+            %{
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            
+            Return state0 and the different datasets. The odd rows of the
+            eeg represent the neurons firing each millisecond, the even
+            rows represent the average spiking of the last n milliseconds
+            (where n is the bin_size) for each millisecond. The labels are 
+            the position and any order of derivation of it, and they are
+            as well the mean of the labels in the bins (apart from the
+            position which has been taken as the last position of the bin).
+            
+            -input
+            trial: the given struct
+            delta: time lag between stimulus and label in ms
+            bin_size: size of the bins (should be a factor of 20 otherwise
+                      things might get messy)
+            order: derivative order of the position
+            percent: percentage of training data
+            start: to which sample start (optional)
+            
+            -output
+            state0: initial set of labels (apart from position)
+            eeg_train: stimulus signal for training
+            eeg_test: stimulus signal for testing
+            x_train: labels signal for training
+            x_test: labels for testing
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %}
+            
             if nargin < 7
                 start = 301;
             end
@@ -220,12 +196,13 @@ classdef PositionEstimator_cl
                     
                     len = size(trial(tr, a).spikes, 2);
                     rows = n_n*2;
-%                     eeg = zeros(rows, len-start+1);
-                    eeg = zeros(n_n, len-start+1);
-%                     eeg(1:2:rows, :) = trial(tr, a).spikes(:,first_t:end-lag);
+                    eeg = zeros(rows, len-start+1);
+%                     eeg = zeros(n_n, len-start+1);
+                    eeg(1:2:rows, :) = trial(tr, a).spikes(:,first_t:end-lag);
                     for history = 1:bin_size
 %                         eeg(2:2:rows, :) = eeg(2:2:rows, :) + ...
-                        eeg = eeg + ...
+%                         eeg = eeg + ...
+                        eeg(2:2:rows, :) = eeg(2:2:rows, :) + ...
                                            (trial(tr, a).spikes(:,(first_t-history):(end-lag-history)) ...
                                            * 10 / 2^(history)) ;
                     end
@@ -255,16 +232,8 @@ classdef PositionEstimator_cl
             end
             state0(1:2, :) = [];
         end
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        function usable_data = apply_dataset(~, data, lag, bin_size)
+
+        function usable_data = apply_sayonara(~, data, lag, bin_size)
             
             [n_n, len] = size(data);
             first_t = len - 19 - lag;
@@ -286,6 +255,36 @@ classdef PositionEstimator_cl
         end
         
         function [state0, eeg_train, eeg_test, x_train, x_test] = sayonara(~, trial, lag, bin_size, order, percent, start)
+            %{
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            
+            Return state0 and the different datasets. The odd rows of the
+            eeg represent the neurons firing each millisecond, the even
+            rows represent the average spiking of the last n milliseconds
+            (where n is the bin_size) for each millisecond. The labels are 
+            the position and any order of derivation of it, and they are
+            as well the mean of the labels in the bins (apart from the
+            position which has been taken as the last position of the bin).
+            
+            -input
+            trial: the given struct
+            delta: time lag between stimulus and label in ms
+            bin_size: size of the bins (should be a factor of 20 otherwise
+                      things might get messy)
+            order: derivative order of the position
+            percent: percentage of training data
+            start: to which sample start (optional)
+            
+            -output
+            state0: initial set of labels (apart from position)
+            eeg_train: stimulus signal for training
+            eeg_test: stimulus signal for testing
+            x_train: labels signal for training
+            x_test: labels for testing
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %}
+            
             if nargin < 7
                 start = 301;
             end
