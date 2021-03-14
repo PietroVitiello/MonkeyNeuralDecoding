@@ -1,4 +1,4 @@
-function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
+function [x, y, modelParameters] = positionEstimator(test_data, modelParameters, direc)
   % Return Value:
   % - [x, y]:
   %     current position of the hand
@@ -8,7 +8,7 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   length_ = 320;
   if size(spikes, 2) <= length_
       init_spikes = sum(spikes(modelParameters.neurons, 1:length_), 2);
-      angle_n = predict(modelParameters.classifier, init_spikes');
+      angle_n = predict(modelParameters.classifier1, init_spikes');
       state0 = modelParameters.initial_params(:, angle_n);
       init_P = modelParameters.init_error_cov;
       x = test_data.startHandPos(1) + state0(1);
@@ -16,6 +16,10 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
       init_x = [x; y; state0];
       modelParameters.angle_n = angle_n;
   else
+      if size(spikes, 2) == 360
+          init_spikes = sum(spikes(modelParameters.neurons, 320:360), 2);
+          modelParameters.angle_n = predict(modelParameters.classifier2, init_spikes');
+      end
       init_x = modelParameters.init_x;
       init_P = modelParameters.init_P;
       x = test_data.decodedHandPos(1, end);

@@ -27,14 +27,16 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   
   neurons_per_angle = 9;
   active_neurons = processor.mostActive(clean_trial, neurons_per_angle);
-  [samples, labels] = processor.create_dataset(training_data, active_neurons);
+  [samples, labels] = processor.create_dataset(training_data, active_neurons, 320, 1);
+  [samples2, labels2] = processor.create_dataset(training_data, active_neurons, 360, 320);
   
   n_neighbours = 28;
-  [Mdl, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);
+  [Mdl1, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);
+  [Mdl2, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples2, labels2);
   
   lag = 5;
   bin_size = 5;
-  [state0, eeg_train, ~, x_train, ~] = estimator.ferromagnetico(training_data, lag, bin_size, 1, 100);
+  [state0, eeg_train, ~, x_train, ~] = estimator.ferromagnetico(training_data, lag, bin_size, 2, 100);
   
   assignin('base', 'eeg_train', eeg_train);
    
@@ -48,7 +50,8 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   modelParameters.W = W;
   modelParameters.H = H;
   modelParameters.Q = Q;
-  modelParameters.classifier = Mdl;
+  modelParameters.classifier1 = Mdl1;
+  modelParameters.classifier2 = Mdl2;
   modelParameters.initial_params = state0;
   modelParameters.lag = lag;
   modelParameters.bin_size = bin_size;
