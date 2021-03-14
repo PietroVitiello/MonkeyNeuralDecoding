@@ -6,8 +6,8 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   spikes = test_data.spikes;
   length_all = size(test_data.spikes,2);
   length_ = 320;
-  if length_all <= length_
-      init_spikes = sum(spikes(modelParameters.neurons_classifier, 1:length_), 2);
+  if size(spikes, 2) <= length_
+      init_spikes = sum(spikes(modelParameters.neurons, 1:length_), 2);
       angle_n = predict(modelParameters.classifier, init_spikes');
       init_x = modelParameters.initial_params(:, angle_n);
       init_P = modelParameters.init_error_cov;
@@ -24,12 +24,13 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   A = modelParameters.A(:, :, modelParameters.angle_n);
   H = modelParameters.H(:, :, modelParameters.angle_n);
   Q = modelParameters.Q(:, :, modelParameters.angle_n);
+%   inv(Q)
+%   det(Q)
   W = modelParameters.W(:, :, modelParameters.angle_n);
   estimator = modelParameters.pos_estimator;
   
-  
-  for i = length_all-20:length_all
-      obs = spikes(modelParameters.neurons_estimator(:, modelParameters.angle_n), i);
+  for i = length_all-29 : length_all-9
+      obs = spikes(1:20, i);
       [init_x, init_P] = estimator.update(A, init_x, H, Q, W, init_P, obs);
       x = x + init_x(1);
       y = y + init_x(2);
@@ -37,4 +38,5 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   
   modelParameters.init_x = init_x;
   modelParameters.init_P = init_P;
+ 
 end

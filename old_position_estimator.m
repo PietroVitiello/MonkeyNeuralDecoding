@@ -1,4 +1,4 @@
-classdef PositionEstimator_cl
+classdef PositionEstimator
     
     properties
         
@@ -12,8 +12,10 @@ classdef PositionEstimator_cl
             
             %M = inv(H*P_pred*H' + Q);
             K_gain = (P_pred*H')*pinv(H*P_pred*H' + Q);
+            % K_gain = P_pred*H'*(inv(H*P_pred*H' + Q));
+
             x_estim = x_pred + K_gain*(obs - H*x_pred);
-            P_estim = (eye(size(x_prev, 1), size(x_prev, 1)) - K_gain*H)*P_pred;
+            P_estim = (eye(size(x_prev, 1)) - K_gain*H)*P_pred;
         end
         
         function [x_train, x_test] = getLabels(~, trial, delta, percent, win_size, deriv, start)
@@ -180,10 +182,10 @@ classdef PositionEstimator_cl
             for tr = 1:size(x_cell, 2)
                 x = x_cell{1,tr};
                 M = size(x, 2);
-                for k = 2:M
-                    sum1 = sum1 + (x(:,k) * x(:,k-1)');
-                    sum2 = sum2 + (x(:,k-1) * x(:,k-1)');
-                end
+                
+                sum1 = sum1 + x(:,2:M) * x(:,1:M-1)';
+                sum2 = sum2 + x(:,1:M-1) * x(:,1:M-1)';
+                
             end
             A = sum1/sum2;
         end
@@ -193,19 +195,16 @@ classdef PositionEstimator_cl
             
             c1 = zeros(d);
             c2 = zeros(d);
-            MM = 0; 
+            W = zeros(d);
             for tr = 1:size(x_cell, 2)
                 x = x_cell{1,tr};
-                M = size(x, 2); 
-                MM = MM + M;
-                for k = 2:M
-                    c1 = c1 + (x(:,k)*x(:,k)');
-                    c2 = c2 + (x(:,k-1)*x(:,k)');
-                end
-                c1 = 1/(M-1)*c1;
-                c2 = 1/(M-1)*c2;
+                M = size(x, 2);
+                
+                c1 = x(:,2:M)*x(:,2:M)';
+                c2 = x(:,1:M-1)*x(:,2:M)';
+                
+                W = W + (1/(M-1))*(c1 - A*c2)./size(x_cell, 2);
             end
-            W = (1/(MM-1))*(c1 - A*c2);
         end
         
         function H = calculateH(~, z_cell, x_cell)
@@ -218,10 +217,10 @@ classdef PositionEstimator_cl
                 x = x_cell{1,tr};
                 z = z_cell{1,tr};
                 M = size(x, 2); 
-                for k = 1:M
-                    sum1 = sum1 + (z(:, k)*x(:, k)');
-                    sum2 = sum2 + (x(:, k)*x(:, k)');
-                end
+                
+                sum1 = sum1 + z(:, 1:M)*x(:, 1:M)';
+                sum2 = sum2 + x(:, 1:M)*x(:, 1:M)';
+                
             end
             
             H = sum1/sum2;
@@ -231,13 +230,14 @@ classdef PositionEstimator_cl
             d_x = size(x_cell{1,1}, 1);
             d_z = size(z_cell{1,1}, 1);
             
-            c1 = zeros(d_z);
-            c2 = zeros(d_x, d_z);
-            MM = 0;
+%             c1 = zeros(d_z);
+%             c2 = zeros(d_x, d_z);
+            Q = zeros(d_z);
             for tr = 1:size(x_cell, 2)
                 x = x_cell{1,tr};
                 z = z_cell{1,tr};
                 M = size(x, 2);
+<<<<<<< HEAD:Submission/PositionEstimator_cl.m
                 MM = MM + M;
                 for k = 1:M
                     c1 = c1 + (z(:,k)*z(:,k)');
@@ -315,6 +315,15 @@ classdef PositionEstimator_cl
                 
             end
         end
+=======
+                
+                c1 = z(:,1:M)*z(:,1:M)';
+                c2 = x(:,1:M)*z(:,1:M)';
+                
+                Q = Q + (1/M)*(c1 - H*c2)./size(x_cell, 2);
+            end
+        end       
+>>>>>>> cf3fd0b58575a18425290caf46e492f1530d3f99:old_position_estimator.m
         
         function [A, W, H, Q] = computeDynamics_(obj, x, z)
             %{
