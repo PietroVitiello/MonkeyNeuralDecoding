@@ -22,9 +22,9 @@ classdef PositionEstimator_cl
             n_bin = floor((len-first_t) / bin_size);
             bin_starts = first_t: bin_size: (first_t+(n_bin-1)*bin_size);
             
-            usable_data = zeros(n_n+1, n_bin);
+            usable_data = zeros(n_n, n_bin);
             for i = 1:n_bin
-                usable_data(2:end, i) = mean(data(:,bin_starts(i):bin_starts(i)+bin_size-1),2);
+                usable_data(:, i) = mean(data(:,bin_starts(i):bin_starts(i)+bin_size-1),2);
             end
             usable_data = [bin_starts; usable_data];
             
@@ -86,9 +86,9 @@ classdef PositionEstimator_cl
                     n_bin = floor((len-start) / bin_size);
                     bin_starts = start: bin_size: (start+(n_bin-1)*bin_size);
                     
-                    eeg = zeros(n_n+1, n_bin);
+                    eeg = zeros(n_n, n_bin);
                     for i = 1:n_bin
-                        eeg(2:end, i) = mean(trial(tr, a).spikes(:,bin_starts(i)-lag:bin_starts(i)+bin_size-1-lag),2);
+                        eeg(:, i) = mean(trial(tr, a).spikes(:,bin_starts(i)-lag:bin_starts(i)+bin_size-1-lag),2);
                     end
                     eeg = [bin_starts; eeg];
                     
