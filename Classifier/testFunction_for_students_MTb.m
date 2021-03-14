@@ -9,14 +9,12 @@ function RMSE = testFunction_for_students_MTb(teamName)
 load monkeydata0.mat
 
 % Set random number generator
-rng(2013);
+% rng(2013);
 ix = randperm(length(trial));
 
-addpath(teamName);
-
 % Select training and testing data (you can choose to split your data in a different way if you wish)
-trainingData = trial(ix(1:50),:);
-testData = trial(ix(51:end),:);
+trainingData = trial(ix(1:80),:);
+testData = trial(ix(81:end),:);
 
 fprintf('Testing the classifier estimator...')
 
@@ -40,10 +38,10 @@ for tr=1:size(testData,1)
 
             past_current_trial.startHandPos = testData(tr,direc).handPos(1:2,1); 
             
-            if nargout('positionEstimator') == 3
+            if nargout('positionEstimator') == 2
                 [angle, newParameters] = positionEstimator(past_current_trial, modelParameters);
                 modelParameters = newParameters;
-            elseif nargout('positionEstimator') == 2
+            elseif nargout('positionEstimator') == 1
                 [angle] = positionEstimator(past_current_trial, modelParameters);
             end
             
@@ -56,12 +54,12 @@ for tr=1:size(testData,1)
     end
 end
 
-sprintf('Correct predictions from first 320: %d out of %d', correct_first, n_predictions);
+fprintf('\n\nCorrect predictions at the beginning: %d out of %d', correct_first, n_predictions);
 
-sprintf('Correct final predictions: %d out of %d', correct_final, n_predictions);
+fprintf('\nCorrect final predictions: %d out of %d', correct_final, n_predictions);
 
 accuracy = correct_final / n_predictions;
-sprintf('Final accuracy: %f', accuracy)
+fprintf('\nFinal accuracy: %f\n\n', accuracy);
 
 rmpath(genpath(teamName))
 

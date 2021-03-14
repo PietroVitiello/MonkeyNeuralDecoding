@@ -6,11 +6,6 @@ function [angle, modelParameters] = positionEstimator(test_data, modelParameters
   if size(spikes, 2) <= length_
       init_spikes = sum(spikes(modelParameters.neurons, 1:length_), 2);
       angle_n = predict(modelParameters.classifier1, init_spikes');
-      state0 = modelParameters.initial_params(:, angle_n);
-      init_P = modelParameters.init_error_cov;
-      x = test_data.startHandPos(1) + state0(1);
-      y = test_data.startHandPos(2) + state0(2);
-      init_x = [x; y; state0];
       modelParameters.angle_n = angle_n;
   else
       if size(spikes, 2) == 360
@@ -22,5 +17,7 @@ function [angle, modelParameters] = positionEstimator(test_data, modelParameters
           modelParameters.angle_n = predict(modelParameters.classifier3, init_spikes');
       end
   end
+  
+  angle = modelParameters.angle_n;
  
 end
