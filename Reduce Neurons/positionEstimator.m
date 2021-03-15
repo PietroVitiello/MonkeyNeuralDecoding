@@ -1,4 +1,4 @@
-function [x, y, modelParameters] = positionEstimator(test_data, modelParameters, direc)
+function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   % Return Value:
   % - [x, y]:
   %     current position of the hand
@@ -38,7 +38,6 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters,
   lag = modelParameters.lag;
   bin_size = modelParameters.bin_size;
   spikes = spikes(modelParameters.neurons_estimator(:, modelParameters.angle_n), :);
-  whos spikes
   usable_data = estimator.apply_ferromagnetico(spikes, lag, bin_size);
   
   for i = 1 : size(usable_data, 2)

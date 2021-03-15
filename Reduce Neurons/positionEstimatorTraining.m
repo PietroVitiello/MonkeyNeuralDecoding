@@ -26,7 +26,7 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   clean_trial = processor.clean_dataset(training_data, silent_neurons);
   
   neurons_per_angle = 9;
-  %neurons_classifier = processor.mostActive(clean_trial, neurons_per_angle);
+  % neurons_classifier = processor.mostActive(clean_trial, neurons_per_angle);
   neurons_classifier = processor.mostActive(training_data, neurons_per_angle);
   [samples, labels] = processor.create_dataset(training_data, neurons_classifier, 320, 1);
   [samples2, labels2] = processor.create_dataset(training_data, [1:98], 360, 1);
@@ -37,8 +37,8 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   [Mdl2, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples2, labels2);
   [Mdl3, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples3, labels3);
   
-  neurons_per_angle = 9;
-  mode = 'vector';
+  neurons_per_angle = 5;
+  mode = 'all';
   if strcmp(mode, 'matrix')
       neurons_estimator_matrix = processor.mostActive(training_data, neurons_per_angle, 300, 571, mode);
   end
@@ -50,8 +50,8 @@ function [modelParameters] = positionEstimatorTraining(training_data)
       end
   end
   if strcmp(mode, 'all')
-      %neurons = [1 2 3 4 5 6 7 9 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 39 40 41 42 43 44 45 46 47 48 50 51 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 75 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98];
-      neurons = 1:80;
+      neurons = [1 2 3 4 5 6 7 9 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 39 40 41 42 43 44 45 46 47 48 50 51 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 75 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98];
+      %neurons = 1:49;
 %       neurons_estimator_matrix = zeros(size(training_data(1, 1).spikes, 1), size(training_data, 2));
 %       for column = 1:size(neurons_estimator_matrix)
 %           neurons_estimator_matrix(:, column) = 1:98;

@@ -88,7 +88,7 @@ classdef Processing
                         %If the temp neuron is not contained in the 
                         %active_neurons list, it is added to it
 
-                        if length(active_neurons) < col*n
+                        if length(active_neurons) == col*n
                             col = col + 1;
                             row = 0;
                             %The ordered firing rates matrix is searched row by
