@@ -1,80 +1,42 @@
 function [modelParameters] = positionEstimatorTraining(training_data)
-<<<<<<< HEAD
-  % Arguments:
- 
-  % - training_data:
-  %     training_data(n,k)              (n = trial id,  k = reaching angle)
-  %     training_data(n,k).trialId      unique number of the trial
-  %     training_data(n,k).spikes(i,t)  (i = neuron id, t = time)
-  %     training_data(n,k).handPos(d,t) (d = dimension [1-3], t = time)
-  
-  % Return Value:
-  
-  % - modelParameters:
-  %     - A
-  %     - W
-  %     - H
-  %     - Q
-  %     - classifier
-  %     - initial parameters
-  %     - neurons
-  %     - pos_estimator
-  %     - init_error_cov
-  
-  processor = Processing();
-  a_classifier = AngleClassifier();
-  estimator = PositionEstimator_cl();
- 
-  silent_neurons = [8 10 11 38 49 52 73 74 76]; 
-  %9 neurons with the least firing across trials and angles
-  clean_trial = processor.clean_dataset(training_data, silent_neurons);
-  %Silent neurons are cleared out of the training data
-  
-  neurons_per_angle = 9;
-  neurons_classifier = processor.mostActive(clean_trial, neurons_per_angle); 
-  %Most active neurons across trials and angles
-  [samples, labels] = processor.create_dataset(training_data, neurons_classifier);
-  %Sample & label dataset is created to build a K-nearest neighbours
-  %classifier
-  
-  n_neighbours = 28; %Number of nearest neighbours
-  [Mdl, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);
-  %Mdl contains the parameters of the classifier
-  
-  % TODO (for this section): find minimum length (not just write it)
-  neurons_per_angle = 6;
-  mode = 'vector';
-  if strcmp(mode, 'matrix')
-      neurons_estimator_matrix = processor.mostActive(clean_trial, neurons_per_angle, 300, 571, mode);
-  end
-  if strcmp(mode, 'vector')
-      neurons_estimator = processor.mostActive(clean_trial, neurons_per_angle, 300, 571, mode); 
-      neurons_estimator_matrix = zeros(length(neurons_estimator), size(training_data,2));
-      for angle_n = 1:size(training_data, 2)
-          neurons_estimator_matrix(:, angle_n) = neurons_estimator';
-      end
-  end
-  
-  [state0, eeg_train, ~, x_train, ~] = estimator.getDataset(training_data, 1, 100);
-  %state0 is the average velocity of the hand during the 300ms prior to the
-  %movement; eeg_train is the training dataset of spike trains from 300 ms
-  %onwards; x_train is the training dataset of hand velocity from 300 ms
-  %onwards
-    
-  eeg_train = estimator.non_redundant(eeg_train, neurons_estimator_matrix);
-  [eeg_train, x_train] = processor.get_average_data(eeg_train, x_train);
-  
-  [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
-  %A, W, H, Q are the Kalman filter matrices
-  
-  modelParameters.A = A; 
-  modelParameters.W = W;
-  modelParameters.H = H;
-  modelParameters.Q = Q;
-  modelParameters.classifier = Mdl;
-  modelParameters.initial_params = state0;
-  modelParameters.neurons_classifier = neurons_classifier;
-  modelParameters.neurons_estimator = neurons_estimator_matrix;
-  modelParameters.pos_estimator = estimator;
-  modelParameters.init_error_cov = ones(2,2);
+processor = Processing();
+a_classifier = AngleClassifier();
+estimator = PositionEstimator_cl();
+
+%     silent_neurons = [8 10 11 38 49 52 73 74 76];
+%     clean_trial = processor.clean_dataset(training_data, silent_neurons);
+
+neurons_per_angle = 9;
+active_neurons = processor.mostActive(training_data, neurons_per_angle);
+
+[samples, labels] = processor.create_dataset(training_data, active_neurons, 320, 1);
+[samples2, labels2] = processor.create_dataset(training_data, 1:98, 360, 1);
+[samples3, labels3] = processor.create_dataset(training_data, 1:98, 400, 1);
+
+n_neighbours = 28;
+[Mdl1, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);
+[Mdl2, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples2, labels2);
+[Mdl3, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples3, labels3);
+
+lag = 5;
+bin_size = 5;
+order = 3;
+[state0, eeg_train, ~, x_train, ~] = estimator.ferromagnetico(training_data, lag, bin_size, order, 100);
+
+[A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
+
+modelParameters.A = A; 
+modelParameters.W = W;
+modelParameters.H = H;
+modelParameters.Q = Q;
+modelParameters.classifier1 = Mdl1;
+modelParameters.classifier2 = Mdl2;
+modelParameters.classifier3 = Mdl3;
+modelParameters.initial_params = state0;
+modelParameters.lag = lag;
+modelParameters.bin_size = bin_size;
+modelParameters.neurons = active_neurons;
+modelParameters.pos_estimator = estimator;
+modelParameters.init_error_cov = ones((order+1)*2);
+
 end
