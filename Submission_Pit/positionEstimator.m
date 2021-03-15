@@ -38,7 +38,7 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters,
   
   lag = modelParameters.lag;
   bin_size = modelParameters.bin_size;
-  usable_data = estimator.apply_ferromagnetico_2(spikes, lag, bin_size);
+  usable_data = estimator.apply_ferromagnetico(spikes, lag, bin_size);
   
   for i = 1 : size(usable_data, 2)
       obs = usable_data(:, i);

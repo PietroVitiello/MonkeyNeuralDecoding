@@ -11,6 +11,10 @@ classdef PositionEstimator_cl
             P_pred = A*P_prev*A' + R;
             
             K_gain = P_pred*H'*(pinv(H*P_pred*H' + Q));
+            whos x_pred
+            whos K_gain
+            whos obs
+            whos H
             x_estim = x_pred + K_gain*(obs - H*x_pred);
             P_estim = (eye(size(x_prev, 1)) - K_gain*H)*P_pred;
         end
