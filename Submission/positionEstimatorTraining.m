@@ -22,7 +22,7 @@ function [modelParameters] = positionEstimatorTraining(training_data)
     lag = 5;
     bin_size = 5;
     order = 3;
-    [state0, eeg_train, ~, x_train, ~] = estimator.ferromagnetico_2(training_data, lag, bin_size, order, 100);
+    [state0, eeg_train, ~, x_train, ~] = estimator.ferromagnetico(training_data, lag, bin_size, order, 100);
 
     [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
 
