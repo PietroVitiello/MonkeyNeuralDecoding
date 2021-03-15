@@ -52,7 +52,7 @@ classdef Processing
 
             for angle_n = 1:size(trial, 2)
                 for i = 1:size(trial, 1)
-                    average_spike_trains(:,angle_n) = average_spike_trains(:,angle_n) + mean(trial(i, angle_n).spikes(:, 1:pre_motor_window), 2);
+                    average_spike_trains(:,angle_n) = average_spike_trains(:,angle_n) + mean(trial(i, angle_n).spikes(:, pre_motor_window), 2);
                 end
             end
 

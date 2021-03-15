@@ -3,8 +3,8 @@ processor = Processing();
 a_classifier = AngleClassifier();
 estimator = PositionEstimator_cl();
 
-%     silent_neurons = [8 10 11 38 49 52 73 74 76];
-%     clean_trial = processor.clean_dataset(training_data, silent_neurons);
+silent_neurons = [8 10 11 38 49 52 73 74 76];
+clean_trial = processor.clean_dataset(training_data, silent_neurons);
 
 neurons_per_angle = 9;
 active_neurons = processor.mostActive(training_data, neurons_per_angle);

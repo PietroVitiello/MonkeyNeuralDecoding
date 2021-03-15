@@ -23,8 +23,6 @@ fprintf('Testing the continuous position estimator...')
 meanSqError = 0;
 n_predictions = 0;  
 
-meanSqError_array = 0
-
 figure
 hold on
 axis square
