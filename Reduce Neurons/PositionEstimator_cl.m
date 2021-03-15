@@ -611,8 +611,8 @@ classdef PositionEstimator_cl
             for angle_n = 1:size(eeg_train, 1)
                 for trial_n = 1:size(eeg_train, 2)
                     temp = eeg_train{angle_n, trial_n};
-                    indices(1:size(neurons_estimator, 1), :) = neurons_estimator(:, angle_n);
-                    indices(end, :) = size(temp, 1);
+                    indices(1, :) = 1;
+                    indices(2:end, :) = neurons_estimator(:, angle_n) + 1;
                     eeg_train{angle_n, trial_n} = temp(indices, :);
                 end
             end
