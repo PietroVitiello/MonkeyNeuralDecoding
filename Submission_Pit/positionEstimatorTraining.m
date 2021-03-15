@@ -46,6 +46,7 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   assignin('base', 'eeg_train', eeg_train);
    
   [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
+
   assignin('base', 'A', A);
   assignin('base', 'W', W);
   assignin('base', 'H', H);
