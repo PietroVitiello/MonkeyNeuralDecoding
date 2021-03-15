@@ -26,7 +26,7 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   clean_trial = processor.clean_dataset(training_data, silent_neurons);
   
   neurons_per_angle = 9;
-  %neurons_classifier = processor.mostActive(clean_trial, neurons_per_angle);
+  %neurons_classifiers = processor.mostActive(clean_trial, neurons_per_angle);
   neurons_classifier = processor.mostActive(training_data, neurons_per_angle);
   [samples, labels] = processor.create_dataset(training_data, neurons_classifier, 320, 1);
   [samples2, labels2] = processor.create_dataset(training_data, [1:98], 360, 1);
