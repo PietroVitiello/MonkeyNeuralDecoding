@@ -18,10 +18,12 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters,
   else
       if size(spikes, 2) == 360
           init_spikes = sum(spikes(modelParameters.eccoli, 1:360), 2);
+          modelParameters.eccoli
           modelParameters.angle_n = predict(modelParameters.classifier2, init_spikes');
       end
       if size(spikes, 2) == 400
           init_spikes = sum(spikes(modelParameters.eccoli, 1:400), 2);
+          modelParameters.eccoli
           modelParameters.angle_n = predict(modelParameters.classifier3, init_spikes');
       end
       init_x = modelParameters.init_x;
