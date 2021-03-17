@@ -17,7 +17,7 @@ classdef Trajectory
             end
         end
         
-        function objective_positions(~, hand)
+        function obj = objective_positions(~, hand)
             n_a = size(hand, 2);
             obj = zeros(2, n_a);
             for a = 1:n_a
@@ -26,15 +26,15 @@ classdef Trajectory
             end
         end
         
-        function [avgT, stdT] = averageTrajectory(~, trial)
+        function [avgT, stdT] = averageTrajectory(~, hand)
             n_a = size(hand, 2);
             time_points = 300 : 20 : 571;
             avgT = zeros(n_a, 2, length(time_points));
             stdT = zeros(n_a, 2, length(time_points));
             
             for a = 1:n_a
-                avgT(a, :, :) = mean(trial(:,a,:,time_points), 1);
-                stdT(a, :, :) = std(trial(:,a,:,time_points), 1);
+                avgT(a, :, :) = mean(hand(:,a,:,time_points), 1);
+                stdT(a, :, :) = std(hand(:,a,:,time_points), 1);
             end
         end
         

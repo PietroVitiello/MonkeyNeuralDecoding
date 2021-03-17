@@ -188,11 +188,11 @@ classdef Processing
             end
             
             spikes_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).spikes, 1), min_length);
-            labels_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).handPos, 1), min_length);
+            labels_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).handPos, 1)-1, min_length);
             for trial_n = 1:size(trial,1)
                 for angle_n = 1: size(trial,2)
                     spikes_matrix(trial_n, angle_n, :, :) = trial(trial_n, angle_n).spikes(:, 1:min_length);
-                    labels_matrix(trial_n, angle_n, :, :) = trial(trial_n, angle_n).handPos(:, 1:min_length);
+                    labels_matrix(trial_n, angle_n, :, :) = trial(trial_n, angle_n).handPos(1:2, 1:min_length);
                 end
             end
         end
