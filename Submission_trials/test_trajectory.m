@@ -7,6 +7,11 @@ classifier = AngleClassifier();
 %% Test average length
 lens = trj.movementDuration(trial);
 
-%% Test average trajectory
+% %% Test average trajectory
+% trajectories = classifier.meanTraces(trial, 1, 320);
 
-trajectories = classifier.meanTraces(trial, 1, 320);
+%% Create matrices
+
+
+%% Find objectives
+obj = trj.objective_positions();
