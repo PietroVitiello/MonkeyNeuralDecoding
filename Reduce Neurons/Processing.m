@@ -70,6 +70,7 @@ classdef Processing
             %all_active_neurons is a matrix, each column represents one
             %angle and the neurons are ordered from the highest to lowest
             %time-averaged firing rate
+            all_active_neurons;
             
             if (nargin > 4) && (strcmp(mode, 'matrix'))
                 active_neurons = all_active_neurons(1:n, :);
@@ -80,28 +81,43 @@ classdef Processing
                 row = 1;
 
                 while length(active_neurons) < n*size(all_active_neurons, 2)
-                %active_neurons must be n*8 elements long 
+                %active_neurons must be n*8 elements long
                     temp = all_active_neurons(row, col);
 
-                    if isempty(find(active_neurons == temp, 1))
+                    %if isempty(find(active_neurons == temp, 1))
+                    if isempty(find(active_neurons == temp))
                         active_neurons = [active_neurons temp];
                         %If the temp neuron is not contained in the 
                         %active_neurons list, it is added to it
+                        
+                        if col == size(all_active_neurons, 2)
+                            row = row + 1;
+                            col = 0;
+                        end
 
-                        if length(active_neurons) == col*n
-                            col = col + 1;
-                            row = 0;
-                            %The ordered firing rates matrix is searched row by
-                            %row (i.e. the whole top row -> the whole second
-                            %row etc.)
+%                         if length(active_neurons) == col*n
+%                             col = col + 1;
+%                             row = 0;
+%                             %The ordered firing rates matrix is searched row by
+%                             %row (i.e. the whole top row -> the whole second
+%                             %row etc.)
+%                         end
+                        
+                    else
+                        if col == size(all_active_neurons, 2)
+                            row = row + 1;
+                            col = 0;
                         end
                     end
-                    row = row + 1;
+                    %row = row + 1;
+                    
+                    col = col + 1;
+
                 end
             end
         end
         
-        
+       
         function [samples, labels] = create_dataset(~, trial, active_neurons, length_premotor, start_premotor)
             if nargin < 4
                 start_premotor = 1;

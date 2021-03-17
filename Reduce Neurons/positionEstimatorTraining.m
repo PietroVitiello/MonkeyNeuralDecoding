@@ -37,21 +37,24 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   [Mdl2, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples2, labels2);
   [Mdl3, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples3, labels3);
   
-  neurons_per_angle = 80;
-  mode = 'all';
+  neurons_per_angle = 10;
+  mode = 'vector';
   if strcmp(mode, 'matrix')
       neurons_estimator_matrix = processor.mostActive(training_data, neurons_per_angle, 300, 571, mode);
+      %neurons_estimator_matrix = processor.mostActive(clean_trial, neurons_per_angle, 300, 571, mode);
   end
   if strcmp(mode, 'vector')
-      neurons_estimator = processor.mostActive(training_data, neurons_per_angle, 300, 571, mode); 
+      neurons_estimator = processor.mostActive(training_data, neurons_per_angle, 300, 571, mode);
+      %neurons_estimator = processor.mostActive(clean_trial, neurons_per_angle, 300, 571, mode);
       neurons_estimator_matrix = zeros(length(neurons_estimator), size(training_data, 2));
       for angle_n = 1:size(training_data, 2)
           neurons_estimator_matrix(:, angle_n) = neurons_estimator';
       end
   end
   if strcmp(mode, 'all')
-      neurons = [1 2 3 4 5 6 7 9 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 39 40 41 42 43 44 45 46 47 48 50 51 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 75 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98];
-      
+      %neurons = [1 2 3 4 5 6 7 9 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 39 40 41 42 43 44 45 46 47 48 50 51 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 75 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98];
+      neurons = 1:98;
+
 %       neurons_estimator_matrix = zeros(size(training_data(1, 1).spikes, 1), size(training_data, 2));
 %       for column = 1:size(neurons_estimator_matrix)
 %           neurons_estimator_matrix(:, column) = 1:98;
@@ -68,7 +71,6 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   [state0, eeg_train, ~, x_train, ~] = estimator.ferromagnetico(training_data, lag, bin_size, 3, 100);
   
   eeg_train = estimator.non_redundant(eeg_train, neurons_estimator_matrix);
-  eeg_train{1, 1}
   
   assignin('base', 'eeg_train', eeg_train);
    
