@@ -74,8 +74,5 @@ classdef Trajectory
             end
         end
         
-        
-        
-        
     end
 end
