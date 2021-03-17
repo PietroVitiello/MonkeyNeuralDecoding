@@ -16,16 +16,6 @@ classdef PositionEstimator_cl
         end
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         function usable_data = apply_ferromagnetico_2(~, data, lag, bin_size)
             
             [n_n, len] = size(data);

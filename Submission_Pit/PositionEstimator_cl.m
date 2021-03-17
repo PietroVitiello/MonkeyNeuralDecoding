@@ -24,6 +24,25 @@ classdef PositionEstimator_cl
         
         
         
+        function usable_data = apply_ferromagnetico_temp(~, data, lag, bin_size, redo)
+            
+            [n_n, len] = size(data);
+            if redo == 0
+                first_t = len - 19 - lag;
+            else
+                first_t = 301 - lag;
+            end
+            n_bin = floor((len-first_t) / bin_size);
+            bin_starts = first_t: bin_size: (first_t+(n_bin-1)*bin_size);
+            
+            usable_data = zeros(n_n, n_bin);
+            for i = 1:n_bin
+                usable_data(:, i) = mean(data(:,bin_starts(i):bin_starts(i)+bin_size-1),2);
+            end
+            usable_data = [bin_starts; usable_data];
+            
+        end
+        
         
         
         
