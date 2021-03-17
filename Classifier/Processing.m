@@ -5,20 +5,20 @@ classdef Processing
     end
     
     methods
-        function trial = clean_dataset(~, trial, silent_neurons)
+        function [trial, neurons] = clean_dataset(~, trial, silent_neurons)
             for angle_n = 1:size(trial, 2)
                 for trial_n = 1:size(trial, 1)
-                    for neuron_n = 1:length(silent_neurons)
-                        trial(trial_n, angle_n).spikes(silent_neurons(neuron_n), :) = [];
-                    end
+                    trial(trial_n, angle_n).spikes(silent_neurons, :) = [];
                 end
             end
+            neurons = 1:98;
+            neurons(silent_neurons) = [];
         end
         
         
         
         
-        function active_neurons = mostActive(~, trial, n, lower_bound, upper_bound)
+        function active_neurons = mostActive(~, trial, n, neurons, lower_bound, upper_bound)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -39,10 +39,10 @@ classdef Processing
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %}
             
-            if nargin < 5
+            if nargin < 6
                 lower_bound = 1;
             end
-            if nargin < 4
+            if nargin < 5
                 upper_bound = 320;
             end
             
@@ -65,7 +65,8 @@ classdef Processing
             row = 1;
             
             while length(active_neurons) < n*size(all_active_neurons, 2)
-                temp = all_active_neurons(row, col);
+                temp_index = all_active_neurons(row, col);
+                temp = neurons(temp_index);
                 
                 if isempty(find(active_neurons == temp, 1))
                     active_neurons = [active_neurons temp];
