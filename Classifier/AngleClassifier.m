@@ -157,9 +157,17 @@ classdef AngleClassifier
         function angle = findSimilarAngle(~, templates, spikes, stop, start)
             
             B = mean(spikes(:, start:stop), 2)';
-            [~, angle] = min(sum(templates - ...
-                         repmat(B, 8, 1)...
+            [~, angle] = min(sum(abs(templates - ...
+                         repmat(B, 8, 1))...
                          , 2));
+        end
+        
+        function angle = findSimilarAngle2(~, templates, spikes, stop, start)
+            
+            B = mean(spikes(:, start:stop), 2)';
+            [~, angle] = min(sum(abs(templates - ...
+                         repmat(B, 8, 1) ...
+                         ).*10, 2));
         end
         
         

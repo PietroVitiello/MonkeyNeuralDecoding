@@ -11,9 +11,11 @@ function [modelParameters] = positionEstimatorTraining_2(training_data)
   a_classifier = AngleClassifier();
   
   [trials, ~] = processor.get_data_matrix(training_data);
-  templates = a_classifier.firingTemplate(trials, 320, 1);
+  templates1 = a_classifier.firingTemplate(trials, 300, 1);
+%   templates2 = a_classifier.firingTemplate(trials, 400, 1);
   
-  modelParameters.templates = templates;
+  modelParameters.templates1 = templates1;
+%   modelParameters.templates2 = templates2;
   modelParameters.classifier = a_classifier;
   
 end
