@@ -17,7 +17,7 @@ classdef Processing
         
         
               
-        function active_neurons = mostActive(~, trial, n, neurons, lower_bound, upper_bound)
+        function [active_neurons active_neuron_matrix] = mostActive(~, trial, n, neurons, lower_bound, upper_bound)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -58,7 +58,12 @@ classdef Processing
             %active neurons is a matrix, each column represents one angle and
             %the neurons are ordered from the highest to lowest
             [~, all_active_neurons] = sort(average_spike_trains, 'descend');
-            all_active_neurons
+            all_active_neurons;
+            
+            active_neuron_matrix = zeros(n, size(trial, 2));
+            for angle_n = 1:size(active_neuron_matrix, 2)
+                active_neuron_matrix(:, angle_n) = neurons(all_active_neurons(1:n, angle_n));
+            end
             
             active_neurons = [];
             col = 1;
