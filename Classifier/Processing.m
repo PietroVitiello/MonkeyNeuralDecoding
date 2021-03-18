@@ -91,6 +91,29 @@ classdef Processing
             end 
         end
         
+        function most_active = mostActive2v(~, data_matrix)
+            most_active = zeros(size(data_matrix,3), size(data_matrix,2));
+            diffs = zeros(size(data_matrix, 3), 2);
+            mean_fr = zeros(size(data_matrix,3), size(data_matrix,1));
+            for neuron_n = 1:size(data_matrix,3)
+                for trial_n = 1:size(data_matrix,1)
+                    for angle_n = 1:size(data_matrix,2)
+                        mean_fr(angle_n, neuron_n) = mean_fr(angle_n, neuron_n) + sum(data_matrix(trial_n, angle_n, neuron_n, 1:end));
+                    end
+                end
+                [fr_sorted, idxs] = sort(mean_fr(:, neuron_n), 'descend');
+                diffs(neuron_n, 1) = fr_sorted(1) - fr_sorted(2);
+                diffs(neuron_n, 2) = idxs(1);
+            end
+             diffs = sortrows(diffs, 2);
+             for i = 1:size(diffs, 1)
+                 angle_n = 1;
+                 j = 1;
+                 while j == angle_n
+                     most_active()
+                 end
+             end
+        end
         
         function [samples, labels] = create_dataset(~, trial, active_neurons, length_premotor, start_premotor)
             if nargin < 4
