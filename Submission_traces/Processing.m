@@ -178,14 +178,16 @@ classdef Processing
         end
         
         function [spikes_matrix, labels_matrix]  = get_data_matrix(~, trial)
-            min_length = Inf;
-            for trial_n = 1:size(trial,1)
-                for angle_n = 1: size(trial,2)
-                    if size(trial(trial_n, angle_n).spikes, 2) < min_length
-                        min_length = size(trial(trial_n, angle_n).spikes, 2);
-                    end
-                end
-            end
+%             min_length = Inf;
+%             for trial_n = 1:size(trial,1)
+%                 for angle_n = 1: size(trial,2)
+%                     if size(trial(trial_n, angle_n).spikes, 2) < min_length
+%                         min_length = size(trial(trial_n, angle_n).spikes, 2);
+%                     end
+%                 end
+%             end
+            
+            min_length = 571;
             
             spikes_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).spikes, 1), min_length);
             labels_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).handPos, 1)-1, min_length);
