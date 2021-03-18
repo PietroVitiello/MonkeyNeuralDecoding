@@ -9,7 +9,7 @@ function RMSE = testFunction_for_students_MTb(teamName)
 load monkeydata0.mat
 
 % Set random number generator
-rng(2013);
+% rng(2013);
 ix = randperm(length(trial));
 
 % addpath(teamName);
@@ -50,7 +50,7 @@ for tr=1:size(testData,1)
                 [decodedPosX, decodedPosY, newParameters] = positionEstimator(past_current_trial, modelParameters, direc);
                 modelParameters = newParameters;
             elseif nargout('positionEstimator') == 2
-                [decodedPosX, decodedPosY] = positionEstimator(past_current_trial, modelParameters);
+                [decodedPosX, decodedPosY] = positionEstimator(past_current_trial, modelParameters, direc);
             end
             
             decodedPos = [decodedPosX; decodedPosY];
