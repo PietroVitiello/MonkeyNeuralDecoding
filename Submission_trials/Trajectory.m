@@ -28,7 +28,7 @@ classdef Trajectory
         
         function [avgT, stdT] = averageTrajectory(~, hand)
             n_a = size(hand, 2);
-            time_points = 300 : 20 : 571;
+            time_points = 320 : 20 : 571;
             avgT = zeros(n_a, 2, length(time_points));
             stdT = zeros(n_a, 2, length(time_points));
             

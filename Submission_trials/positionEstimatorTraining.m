@@ -19,28 +19,13 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   
   
   processor = Processing();
-  estimator = PositionEstimator_cl();
-  
-  lag = 5;
-  bin_size = 5;
-  order = 3;
-  [state0, eeg_train, ~, x_train, ~] = estimator.ferromagnetico_2(training_data, lag, bin_size, order, 100);
-  
-  assignin('base', 'eeg_train', eeg_train);
+  trj = Trajectory();
    
-  [A, W, H, Q] = estimator.computeDynamics(x_train, eeg_train);
-  assignin('base', 'A', A);
-  assignin('base', 'W', W);
-  assignin('base', 'H', H);
-  assignin('base', 'Q', Q);
+  [~, pos] = processor.get_data_matrix(training_data);
+  obj = trj.objective_positions(pos);
+  [avgT, ~] = trj.averageTrajectory(pos);
   
-  modelParameters.A = A; 
-  modelParameters.W = W;
-  modelParameters.H = H;
-  modelParameters.Q = Q;
-  modelParameters.initial_params = state0;
-  modelParameters.lag = lag;
-  modelParameters.bin_size = bin_size;
-  modelParameters.pos_estimator = estimator;
-  modelParameters.init_error_cov = ones((order+1)*2);
+  modelParameters.objectives = obj;
+  modelParameters.traces = avgT;
+  
 end
