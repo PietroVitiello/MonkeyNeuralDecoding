@@ -142,6 +142,26 @@ classdef AngleClassifier
         end
         
         
+        function templates = firingTemplate(~, trial, stop, start)
+            
+            n_a = size(trial, 2);
+            n_n = size(trial, 3);
+            templates = zeros(n_a, n_n, 1);
+            
+            templates = squeeze(mean(mean(...
+                        trial(:,:,:,start:stop)...
+                        , 4), 1));
+        end
+        
+        function angle = findSimilarAngle(~, templates, spikes, stop, start)
+            
+            B = mean(spikes(:, start:stop), 2)';
+            [~, angle] = min(sum(templates - ...
+                         repmat(B, 8, 1)...
+                         , 2));
+        end
+        
+        
     end
     
 end
