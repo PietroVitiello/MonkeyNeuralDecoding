@@ -1,9 +1,15 @@
-function [x, y] = positionEstimator(test_data, modelParameters, direc)
+function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   % Return Value:
   % - [x, y]:
   %     current position of the hand
   
-  angle_n = direc;
+  if size(test_data.spikes, 2) == 320
+      classifier = modelParameters.classifier;
+      angle = classifier.findSimilarAngle(modelParameters.templates, test_data.spikes, 300, 1);
+      modelParameters.angle_n = angle;
+  end
+  angle_n = modelParameters.angle_n;
+  
   len = size(test_data.spikes,2);
   time_point = (len-300)/20;
   if time_point <= size(modelParameters.traces, 3)

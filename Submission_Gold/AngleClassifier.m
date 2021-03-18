@@ -142,19 +142,32 @@ classdef AngleClassifier
         end
         
         
-        
-        
-        function meanTraces(~, trial, start, stop)
+        function templates = firingTemplate(~, trial, stop, start)
+            
             n_a = size(trial, 2);
-            n_tr = size(trial, 1);
-            meanTraces = zeros(n_a, stop-start+1);
+            n_n = size(trial, 3);
+            templates = zeros(n_a, n_n, 1);
             
-            for a = 1:n_a
-                for tr = 1:n_tr
-                    meanTraces(a, :) = mean(trial(:,a,:,start:stop), 1);
-                end
-            end
+            templates = squeeze(mean(mean(...
+                        trial(:,:,:,start:stop)...
+                        , 4), 1));
+                    
+        end
+        
+        function angle = findSimilarAngle(~, templates, spikes, stop, start)
             
+            B = mean(spikes(:, start:stop), 2)';
+            [~, angle] = min(sum(abs(templates - ...
+                         repmat(B, 8, 1))...
+                         , 2));
+        end
+        
+        function angle = findSimilarAngle2(~, templates, spikes, stop, start)
+            
+            B = mean(spikes(:, start:stop), 2)';
+            [~, angle] = min(prod((abs(templates - ...
+                         repmat(B, 8, 1) ...
+                         )+1).*10, 2));
         end
         
         

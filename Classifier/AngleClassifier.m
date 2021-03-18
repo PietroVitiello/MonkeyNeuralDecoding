@@ -165,9 +165,9 @@ classdef AngleClassifier
         function angle = findSimilarAngle2(~, templates, spikes, stop, start)
             
             B = mean(spikes(:, start:stop), 2)';
-            [~, angle] = min(sum(abs(templates - ...
+            [~, angle] = min(prod((abs(templates - ...
                          repmat(B, 8, 1) ...
-                         ).*10, 2));
+                         )+1).*10, 2));
         end
         
         function angle = closestFiring(~, active_neurons, spikes, stop, start)
