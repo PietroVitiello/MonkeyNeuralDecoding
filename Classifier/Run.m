@@ -1,8 +1,10 @@
 clc
 tic
 load monkeydata0
-%testFunction_for_Classifier('Team Cassius')
-testFunction_for_Classifier_2('Team Cassius')
+% tests = testFunction_for_Classifier('Team Cassius');
+% tests = testFunction_for_Classifier_2('Team Cassius');
+tests = testFunction_for_Classifier_3('Team Cassius');
 elapsed_time = toc;
-fprintf('The elapsed time is %f', elapsed_time);
+fprintf('Total elapsed time is %f', elapsed_time);
+fprintf('Time elapsed per test is %f', elapsed_time/tests);
 

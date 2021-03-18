@@ -4,7 +4,7 @@
 % the relevant modelParameters, and then calls the function
 % "positionEstimator" to decode the trajectory. 
 
-function RMSE = testFunction_for_Classifier(teamName)
+function n_different_tests = testFunction_for_Classifier(teamName)
 
 load monkeydata0.mat
 
