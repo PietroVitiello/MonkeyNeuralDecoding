@@ -11,7 +11,7 @@ load monkeydata0.mat
 n_different_tests = 10;
 correct_first = 0;
 correct_final = 0;
-tic
+
 for test = 1:n_different_tests
     % Set random number generator
     %rng(2013);
@@ -57,7 +57,7 @@ for test = 1:n_different_tests
         end
     end
 end
-toc
+
 fprintf('\n\nCorrect predictions at the beginning: %.3f out of %d', correct_first/n_different_tests, n_predictions);
 
 fprintf('\nCorrect final predictions: %.3f out of %d', correct_final/n_different_tests, n_predictions);
