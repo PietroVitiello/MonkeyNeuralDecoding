@@ -70,13 +70,22 @@ classdef Processing
                 if isempty(find(active_neurons == temp, 1))
                     active_neurons = [active_neurons temp];
                     
-                    if length(active_neurons) == col*n
-                        col = col + 1;
-                        row = 0;
+%                     if length(active_neurons) == col*n
+%                         col = col + 1;
+%                         row = 0;
+%                     end
+                    if col == size(all_active_neurons, 2)
+                        row = row + 1;
+                        col = 0;
+                    end
+                else
+                    if col == size(all_active_neurons, 2)
+                        row = row + 1;
+                        col = 0;
                     end
                 end
                 
-                row = row + 1;
+                col = col + 1;
             end 
         end
         
