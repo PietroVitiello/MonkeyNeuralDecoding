@@ -8,7 +8,7 @@ function RMSE = testFunction_for_Classifier(teamName)
 
 load monkeydata0.mat
 
-n_different_tests = 10;
+n_different_tests = 1;
 correct_first = 0;
 correct_final = 0;
 

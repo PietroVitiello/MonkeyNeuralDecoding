@@ -151,6 +151,7 @@ classdef AngleClassifier
             templates = squeeze(mean(mean(...
                         trial(:,:,:,start:stop)...
                         , 4), 1));
+                    
         end
         
         function angle = findSimilarAngle(~, templates, spikes, stop, start)
