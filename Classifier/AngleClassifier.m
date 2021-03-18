@@ -170,6 +170,22 @@ classdef AngleClassifier
                          ).*10, 2));
         end
         
+        function angle = closestFiring(~, active_neurons, spikes, stop, start)
+           
+            spikes_t_average = mean(spikes(:, stop:start), 2);
+            n = size(active_neurons, 1);
+            [~, most_firing] = sort(spikes_t_average, 'descend');
+            current_active = most_firing(1:n);
+            
+            similarity_matrix = zeros(size(active_neurons, 1), size(active_neurons, 2));
+            for angle_n = 1:size(active_neurons, 2)
+                similarity_matrix(:, angle_n) = active_neurons(:, angle_n) == current_active;
+            end
+            similarity_vector = sum(similarity_matrix, 1);
+            [~, angle] = max(similarity_vector);
+            
+        end
+        
         
     end
     
