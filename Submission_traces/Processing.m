@@ -189,6 +189,7 @@ classdef Processing
             
             min_length = 571;
             
+            
             spikes_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).spikes, 1), min_length);
             labels_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).handPos, 1)-1, min_length);
             for trial_n = 1:size(trial,1)
