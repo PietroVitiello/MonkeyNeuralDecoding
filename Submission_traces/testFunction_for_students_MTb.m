@@ -9,7 +9,7 @@ function RMSE = testFunction_for_students_MTb(teamName)
 load monkeydata0.mat
 
 % Set random number generator
-% rng(2013);
+rng(2013);
 ix = randperm(length(trial));
 
 % addpath(teamName);

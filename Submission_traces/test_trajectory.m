@@ -13,6 +13,7 @@ lens = trj.movementDuration(trial);
 
 %% Create matrices
 [trials, pos] = process.get_data_matrix(trial);
+final_pos = process.get_data_matrix_final(trial);
 
 %% Find objectives
 obj = trj.objective_positions(pos);

@@ -12,7 +12,7 @@ classdef Trajectory
             lens = zeros(1, n_a);
             for a = 1:n_a
                 for tr = 1:n_tr
-                    lens(a) = lens(a) + size(trial(tr,a).spikes - 400,2)/n_tr;
+                    lens(a) = lens(a) + (size(trial(tr,a).spikes,2) - 400)/n_tr;
                 end
             end
         end
@@ -21,7 +21,7 @@ classdef Trajectory
             n_a = size(hand, 2);
             obj = zeros(2, n_a);
             obj = squeeze(mean(mean(...
-                  hand(:, :, :, end-50:end), 4), 1))';
+                  hand(:, :, :, end-99:end), 4), 1))';
         end
         
         function [avgT, stdT] = averageTrajectory(~, hand)

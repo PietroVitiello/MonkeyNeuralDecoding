@@ -22,7 +22,8 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   trj = Trajectory();
    
   [~, pos] = processor.get_data_matrix(training_data);
-  obj = trj.objective_positions(pos);
+  final_pos = processor.get_data_matrix_final(training_data);
+  obj = trj.objective_positions(final_pos);
   [avgT, ~] = trj.averageTrajectory(pos);
   
   modelParameters.objectives = obj;

@@ -199,5 +199,25 @@ classdef Processing
             end
         end
         
+        function labels_matrix  = get_data_matrix_final(~, trial)
+%             min_length = Inf;
+%             for trial_n = 1:size(trial,1)
+%                 for angle_n = 1: size(trial,2)
+%                     if size(trial(trial_n, angle_n).spikes, 2) < min_length
+%                         min_length = size(trial(trial_n, angle_n).spikes, 2);
+%                     end
+%                 end
+%             end
+            
+            final_interval = 100;
+
+            labels_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).handPos, 1)-1, final_interval);
+            for trial_n = 1:size(trial,1)
+                for angle_n = 1: size(trial,2)
+                    labels_matrix(trial_n, angle_n, :, :) = trial(trial_n, angle_n).handPos(1:2, end-(final_interval-1):end);
+                end
+            end
+        end
+        
     end
 end
