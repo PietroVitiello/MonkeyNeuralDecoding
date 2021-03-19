@@ -24,6 +24,13 @@ classdef Trajectory
                   hand(:, :, :, end-99:end), 4), 1))';
         end
         
+        function obj = initial_positions(~, hand)
+            n_a = size(hand, 2);
+            obj = zeros(2, n_a);
+            obj = squeeze(mean(mean(...
+                  hand(:, :, :, 1), 4), 1))';
+        end        
+        
         function [avgT, stdT] = averageTrajectory(~, hand)
             n_a = size(hand, 2);
             time_points = 320 : 20 : 571;

@@ -9,9 +9,9 @@ function RMSE = testFunction_for_students_MTb(teamName)
 load monkeydata0.mat
 
 % Set random number generator
-rng(2013);
+rng(2010);
 ix = randperm(length(trial));
-
+s = rng
 % addpath(teamName);
 
 % Select training and testing data (you can choose to split your data in a different way if you wish)

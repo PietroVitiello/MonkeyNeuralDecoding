@@ -23,10 +23,15 @@ function [modelParameters] = positionEstimatorTraining(training_data)
    
   [~, pos] = processor.get_data_matrix(training_data);
   final_pos = processor.get_data_matrix_final(training_data);
+  initial_pos = processor.get_data_matrix_initial(training_data);
+  
   obj = trj.objective_positions(final_pos);
-  [avgT, ~] = trj.averageTrajectory(pos);
+  start = trj.initial_positions(initial_pos);
+  [avgT, stdT] = trj.averageTrajectory(pos);
   
   modelParameters.objectives = obj;
+  modelParameters.initial = start;
   modelParameters.traces = avgT;
+  modelParameters.deviation = stdT;
   
 end
