@@ -26,6 +26,9 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   [trials, pos] = processor.get_data_matrix(training_data);
   final_pos = processor.get_data_matrix_final(training_data);
   
+  templates = a_classifier.firingTemplate(trials, 300, 1);
+  angle_distributions = processor.firingDistribution(trials, 1, 320);
+  
   start = trj.initial_positions(initial_pos);
   [avgT, stdT] = trj.averageTrajectory(pos);
   obj = trj.objective_positions(final_pos);
@@ -34,5 +37,8 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   modelParameters.traces = avgT;
   modelParameters.deviation = stdT;
   modelParameters.objectives = obj;
+  modelParameters.classifier = a_classifier;
+  modelParameters.templates = templates;
+  modelParameters.distributions = angle_distributions;
   
 end
