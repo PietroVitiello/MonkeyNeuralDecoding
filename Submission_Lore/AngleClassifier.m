@@ -141,6 +141,93 @@ classdef AngleClassifier
             end
         end
         
+        function templates = firingTemplate(~, trial, stop, start)
+            
+            n_a = size(trial, 2);
+            n_n = size(trial, 3);
+            templates = zeros(n_a, n_n, 1);
+            
+            templates = squeeze(mean(mean(...
+                        trial(:,:,:,start:stop)...
+                        , 4), 1));
+                    
+                    
+        end
+        
+        function angle = findSimilarAngle(~, templates, spikes, stop, start)
+            
+            B = mean(spikes(:, start:stop), 2)';
+            [~, angle] = min(sum(abs(templates - ...
+                         repmat(B, 8, 1))...
+                         , 2));
+                     
+        end
+        
+        % Worse, don't use
+        function angle = findSimilarAngle2(~, templates, spikes, stop, start)
+            
+            B = mean(spikes(:, start:stop), 2)';
+            [~, angle] = min(prod((abs(templates - ...
+                         repmat(B, 8, 1) ...
+                         )+1).*10, 2));
+                     
+        end
+        
+        function angle = likelyDistribution(~, angle_distributions, spikes, start, stop)
+            
+            avg_activity = mean( ...
+                           spikes(:, start:stop) ...
+                           , 2);
+            
+            distribution = repmat( ...
+                           avg_activity / sum(avg_activity) ...
+                           , 1, 8);
+                       
+            [~, angle] = min(sum(abs(angle_distributions - ...
+                         distribution)...
+                         , 1)');
+            
+        end
+        
+        function angle = similarityDistributions(~, templates, angle_distributions, spikes, start, stop)
+            
+            B = mean(spikes(:, start:stop), 2)';
+            similar_firing = sum(abs(templates - ...
+                             repmat(B, 8, 1))...
+                             , 2);
+                     
+            avg_activity = mean( ...
+                           spikes(:, start:stop) ...
+                           , 2);
+            
+            distribution = repmat( ...
+                           avg_activity / sum(avg_activity) ...
+                           , 1, 8);
+                       
+            similar_dist = sum(abs(angle_distributions - ...
+                           distribution)...
+                           , 1)';
+                     
+            [~, angle] = min(similar_firing + similar_dist);
+            
+        end
+        
+           
+        function angle = closestFiring(~, active_neurons, spikes, stop, start)
+           
+            spikes_t_average = mean(spikes(:, stop:start), 2);
+            n = size(active_neurons, 1);
+            [~, most_firing] = sort(spikes_t_average, 'descend');
+            current_active = most_firing(1:n);
+            
+            similarity_matrix = zeros(size(active_neurons, 1), size(active_neurons, 2));
+            for angle_n = 1:size(active_neurons, 2)
+                similarity_matrix(:, angle_n) = active_neurons(:, angle_n) == current_active;
+            end
+            similarity_vector = sum(similarity_matrix, 1);
+            [~, angle] = max(similarity_vector);
+            
+        end
         
     end
     
