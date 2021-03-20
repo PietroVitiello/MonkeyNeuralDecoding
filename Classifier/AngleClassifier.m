@@ -227,6 +227,123 @@ classdef AngleClassifier
             
         end
         
+        function angle = aply_anglePreference(~, pref_mag, pref_neuron, sum_activity, spikes, start, stop)
+           
+            spikesAdistribution = repmat(mean(spikes(:, start:stop), 2) ...
+                                  ./ sum_activity, 1, 8);
+                              
+            colI = repmat(1:8, size(pref_mag, 1), 1);
+            chosen_mag = spikesAdistribution( ...
+                         sub2ind(size(spikesAdistribution) ...
+                         , pref_neuron, colI));
+                     
+            assignin('base', 'a', spikesAdistribution);
+            assignin('base', 'b', pref_neuron);
+            assignin('base', 'c', chosen_mag);
+            
+            [~, angle] = min(sum(abs(pref_mag - ...
+                         chosen_mag)...
+                         , 1), [], 2);
+            
+        end
+        
+        function angle = bin_activity(~, pref_mag, pref_neuron, sum_activity, spikes, start, stop)
+           
+            spikesAdistribution = repmat(mean(spikes(:, start:stop), 2) ...
+                                  ./ sum_activity, 1, 8);
+                              
+            colI = repmat(1:8, size(pref_mag, 1), 1);
+            chosen_mag = spikesAdistribution( ...
+                         sub2ind(size(spikesAdistribution) ...
+                         , pref_neuron, colI));
+                     
+            [~, angle] = max(sum( ...
+                         chosen_mag)...
+                         , [], 2);
+            
+        end
+        
+        function angle = binSimilarityDistributions(~, templates, angle_distributions, pref_neuron, sum_activity, spikes, start, stop)
+            
+            B = mean(spikes(:, start:stop), 2)';
+            similar_firing = sum(abs(templates - ...
+                             repmat(B, 8, 1))...
+                             , 2);
+            
+            distribution = repmat( ...
+                           B' / sum(B') ...
+                           , 1, 8);
+                       
+            similar_dist = sum(abs(angle_distributions - ...
+                           distribution)...
+                           , 1)';
+                       
+            spikesAdistribution = repmat(B ...
+                                  ./ sum_activity, 1, 8);
+                              
+            colI = repmat(1:8, size(pref_neuron, 1), 1);
+            chosen_mag = spikesAdistribution( ...
+                         sub2ind(size(spikesAdistribution) ...
+                         , pref_neuron, colI));
+                     
+            binned_activity = sum( ...
+                              chosen_mag);
+                          
+            [~, angle] = min(similar_firing + similar_dist - 0.005*binned_activity');
+        end
+        
+        
+        function par = neuronDistribution_mle(~, trial, start, stop)
+            n_n = size(trial, 3);
+            n_a = size(trial, 2);
+            
+            avg_activity = mean( ...
+                           trial(:, :, :, start:stop) ...
+                           , 4);
+            
+            sum_activity = sum(avg_activity, 3);
+            
+            distribution = avg_activity ./ ...
+                           repmat(sum_activity, 1, 1, n_n);
+            
+            par = zeros(n_n, n_a, 2);
+%             par(:,:,1) = arrayfun(@(aI, nI) mle(distribution(:,aI,nI)), ...
+%                            1:n_a, 1:n_n);
+            for n = 1:n_n
+                for a = 1:n_a
+                    par(n, a, :) = mle(distribution(:, a, n));
+                end
+            end
+            
+        end
+        
+        
+        function angle = apply_nDistribution_mle(~, spikes, par, start, stop)
+            
+            n_n = size(par, 1);
+            n_a = size(par, 2);
+            
+            avg_activity = mean( ...
+                           spikes(:, start:stop) ...
+                           , 2);
+            
+            sum_activity = sum(avg_activity);
+            
+            distribution = avg_activity / sum_activity;
+            
+            like_a = zeros(n_n, n_a);
+            for n = 1:n_n
+                for a = 1:n_a
+                    like_a(n, a) = normpdf(distribution(n), par(n,a,1), par(n,a,2));
+                end
+            end
+            silent_n = [8, 24, 25, 38, 42, 49, 52, 54, 73, 74, 76];
+            like_a(silent_n,:) = [];
+            like_a(isnan(like_a)) = 0.000001;
+            likelihood = prod(like_a);
+            [~, angle] = max(likelihood);
+            
+        end
         
     end
     

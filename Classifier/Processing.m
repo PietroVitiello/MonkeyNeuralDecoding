@@ -208,7 +208,7 @@ classdef Processing
             specific_neurons = specific_neurons(1:neuronsXangle, :);
         end
         
-        
+        % distribution of activity across neurons
         function distribution = firingDistribution(~, trial, start, stop)
             n_n = size(trial, 3);
             
@@ -221,6 +221,30 @@ classdef Processing
             distribution = avg_activity ./ ...
                            repmat(sum_activity, n_n, 1);
             
+        end
+        
+        % sorted distribution of activity across angles
+        function [pref_mag, pref_neuron, sum_activity] = anglePreference(~, trial, start, stop)
+            n_a = size(trial, 2);
+            
+            avg_activity = squeeze(mean(mean( ...
+                           trial(:, :, :, start:stop) ...
+                           , 4), 1))';
+            
+            sum_activity = sum(avg_activity, 2);
+            
+            distribution = avg_activity ./ ...
+                           repmat(sum_activity, 1, n_a);
+                       
+            [pref_mag, pref_neuron] = sort(distribution, 'descend');
+            
+        end
+        
+        
+        function activity = overallActivity(~, trial, start, stop)
+            activity = squeeze(sum(mean( ...
+                       trial(:,:,:,start:stop) ...
+                       , 1), 3));
         end
         
         
