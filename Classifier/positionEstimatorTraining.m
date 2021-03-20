@@ -16,8 +16,8 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   [clean_trial, clean_neurons] = processor.clean_dataset(training_data, silent_neurons);
 
   neurons_per_angle = 6;
-  %[active_neurons active_neurons_matrix] = processor.mostActive(clean_trial, neurons_per_angle, clean_neurons);
-  [active_neurons active_neurons_matrix] = processor.mostActive(training_data, neurons_per_angle, 1:98);
+  [active_neurons active_neurons_matrix] = processor.mostActive(clean_trial, neurons_per_angle, clean_neurons);
+  %[active_neurons active_neurons_matrix] = processor.mostActive(training_data, neurons_per_angle, 1:98);
   eccoli_qui = 1:98; %processor.mostActive(clean_trial, 4, 300, 400);
 
   [samples, labels] = processor.create_dataset(training_data, active_neurons, 320, 1);
