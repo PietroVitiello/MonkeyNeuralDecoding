@@ -20,9 +20,10 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   
   processor = Processing();
   trj = Trajectory();
+  a_classifier = AngleClassifier();
   
   initial_pos = processor.get_data_matrix_initial(training_data);
-  [~, pos] = processor.get_data_matrix(training_data);
+  [trials, pos] = processor.get_data_matrix(training_data);
   final_pos = processor.get_data_matrix_final(training_data);
   
   start = trj.initial_positions(initial_pos);

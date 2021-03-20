@@ -1,4 +1,4 @@
-function [x, y, modelParameters] = positionEstimator(test_data, modelParameters, direc)
+function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   % Return Value:
   % - [x, y]:
   %     current position of the hand
