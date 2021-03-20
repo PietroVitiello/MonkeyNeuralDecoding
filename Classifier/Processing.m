@@ -91,28 +91,38 @@ classdef Processing
             end 
         end
         
-        function most_active = mostActive2v(~, data_matrix)
+        function most_active = mostActiveV2(~, data_matrix)
             most_active = zeros(size(data_matrix,3), size(data_matrix,2));
-            diffs = zeros(size(data_matrix, 3), 2);
+            diffs = zeros(size(data_matrix, 3), 3);
             mean_fr = zeros(size(data_matrix,3), size(data_matrix,1));
             for neuron_n = 1:size(data_matrix,3)
                 for trial_n = 1:size(data_matrix,1)
                     for angle_n = 1:size(data_matrix,2)
-                        mean_fr(angle_n, neuron_n) = mean_fr(angle_n, neuron_n) + sum(data_matrix(trial_n, angle_n, neuron_n, 1:end));
+                        mean_fr(neuron_n, angle_n) = mean_fr(neuron_n, angle_n) + sum(data_matrix(trial_n, angle_n, neuron_n, 1:300));
                     end
                 end
-                [fr_sorted, idxs] = sort(mean_fr(:, neuron_n), 'descend');
-                diffs(neuron_n, 1) = fr_sorted(1) - fr_sorted(2);
-                diffs(neuron_n, 2) = idxs(1);
+                mean_fr(neuron_n, :) = mean_fr(neuron_n, :)./size(data_matrix,1);
+                [fr_sorted, idxs] = sort(mean_fr(neuron_n, :), 'descend');
+                diffs(neuron_n, 1) = (fr_sorted(1) - fr_sorted(2))/fr_sorted(1);
+                diffs(neuron_n, 2) = neuron_n; 
+                diffs(neuron_n, 3) = idxs(1);
             end
-             diffs = sortrows(diffs, 2);
-             for i = 1:size(diffs, 1)
-                 angle_n = 1;
-                 j = 1;
-                 while j == angle_n
-                     most_active()
-                 end
-             end
+            diffs = sortrows(diffs, 3);
+            idx = 1;
+            for angle_n = 1:size(data_matrix,2)
+                count = 0;
+                while diffs(idx,3) == angle_n 
+                    count = count + 1;
+                    if idx < size(diffs, 1)
+                        idx = idx + 1;
+                    else
+                        break
+                    end
+                end
+                temp = diffs(idx - count: idx-1, 1:2);
+                temp = sortrows(temp, 1);
+                most_active(1:size(temp,1), angle_n) = temp(:, 2);
+            end
         end
         
         function [samples, labels] = create_dataset(~, trial, active_neurons, length_premotor, start_premotor)
@@ -198,9 +208,7 @@ classdef Processing
         end
         
         function [spikes_matrix, labels_matrix]  = get_data_matrix(~, trial)
-            
             min_length = 571;
-            
             spikes_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).spikes, 1), min_length);
             labels_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).handPos, 1)-1, min_length);
             for trial_n = 1:size(trial,1)
