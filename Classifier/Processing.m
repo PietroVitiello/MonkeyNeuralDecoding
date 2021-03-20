@@ -17,7 +17,7 @@ classdef Processing
         
         
               
-        function [active_neurons active_neuron_matrix] = mostActive(~, trial, n, neurons, lower_bound, upper_bound)
+        function [active_neurons, active_neuron_matrix] = mostActive(~, trial, n, neurons, lower_bound, upper_bound)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -218,6 +218,66 @@ classdef Processing
                 end
             end
         end
+        
+        
+        function specific_neurons = mostSpecific(~, trial, start, stop, neuronsXangle)
+            n_a = size(trial, 2);
+            n_n = size(trial, 3);
+            
+            avg_activity = zeros(n_n, n_a);
+            
+            avg_activity = squeeze(mean(mean( ...
+                           trial(:, :, :, start:stop) ...
+                           , 4), 1))';
+            sum_activity = sum(avg_activity, 2);
+            avg_activity = avg_activity * 2;
+            
+            specific = zeros(n_n, n_a);
+            specific = 2*(avg_activity - repmat(sum_activity, 1, n_a))./avg_activity;
+            
+            [~, specific_neurons] = sort(specific, 'descend');
+            specific_neurons = specific_neurons(1:neuronsXangle, :);
+        end
+        
+        % distribution of activity across neurons
+        function distribution = firingDistribution(~, trial, start, stop)
+            n_n = size(trial, 3);
+            
+            avg_activity = squeeze(mean(mean( ...
+                           trial(:, :, :, start:stop) ...
+                           , 4), 1))';
+            
+            sum_activity = sum(avg_activity, 1);
+            
+            distribution = avg_activity ./ ...
+                           repmat(sum_activity, n_n, 1);
+            
+        end
+        
+        % sorted distribution of activity across angles
+        function [pref_mag, pref_neuron, sum_activity] = anglePreference(~, trial, start, stop)
+            n_a = size(trial, 2);
+            
+            avg_activity = squeeze(mean(mean( ...
+                           trial(:, :, :, start:stop) ...
+                           , 4), 1))';
+            
+            sum_activity = sum(avg_activity, 2);
+            
+            distribution = avg_activity ./ ...
+                           repmat(sum_activity, 1, n_a);
+                       
+            [pref_mag, pref_neuron] = sort(distribution, 'descend');
+            
+        end
+        
+        
+        function activity = overallActivity(~, trial, start, stop)
+            activity = squeeze(sum(mean( ...
+                       trial(:,:,:,start:stop) ...
+                       , 1), 3));
+        end
+        
         
     end
 end
