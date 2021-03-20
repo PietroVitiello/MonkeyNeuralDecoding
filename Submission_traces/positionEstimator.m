@@ -35,8 +35,8 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters,
   end
   
   if time_point <= size(modelParameters.traces, 3)
-      x = modelParameters.traces(angle_n, 1, time_point) + modelParameters.noise(1, 1)*modelParameters.deviation(angle_n, 1, time_point)*modelParameters.scale(1, 1)/8;
-      y = modelParameters.traces(angle_n, 2, time_point) + modelParameters.noise(2, 1)*modelParameters.deviation(angle_n, 2, time_point)*modelParameters.scale(2, 1)/8;
+      x = modelParameters.traces(angle_n, 1, time_point) + modelParameters.noise(1, 1)*modelParameters.deviation(angle_n, 1, time_point)*modelParameters.scale(1, 1)/7.5;
+      y = modelParameters.traces(angle_n, 2, time_point) + modelParameters.noise(2, 1)*modelParameters.deviation(angle_n, 2, time_point)*modelParameters.scale(2, 1)/7.5;
   else
       x = modelParameters.objectives(1, angle_n);
       y = modelParameters.objectives(2, angle_n);

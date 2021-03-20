@@ -8,7 +8,7 @@ function average_RMSE = testFunction_for_students_MTb(teamName)
 
 load monkeydata0.mat
 
-n_different_tests = 20;
+n_different_tests = 40;
 RMSE_runs = zeros(1, n_different_tests);
 
 for test = 1:n_different_tests
