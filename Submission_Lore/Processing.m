@@ -33,7 +33,7 @@ classdef Processing
         
         
         
-        function active_neurons = mostActive(~, trial, n, lower_bound, upper_bound)
+        function [active_neurons, active_neuron_matrix] = mostActive(~, trial, n, neurons, lower_bound, upper_bound)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
@@ -54,10 +54,10 @@ classdef Processing
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             %}
             
-            if nargin < 5
+            if nargin < 6
                 lower_bound = 1;
             end
-            if nargin < 4
+            if nargin < 5
                 upper_bound = 320;
             end
             
@@ -74,24 +74,36 @@ classdef Processing
             %active neurons is a matrix, each column represents one angle and
             %the neurons are ordered from the highest to lowest
             [~, all_active_neurons] = sort(average_spike_trains, 'descend');
+            all_active_neurons;
+            
+            active_neuron_matrix = zeros(n, size(trial, 2));
+            for angle_n = 1:size(active_neuron_matrix, 2)
+                active_neuron_matrix(:, angle_n) = neurons(all_active_neurons(1:n, angle_n));
+            end
             
             active_neurons = [];
             col = 1;
             row = 1;
             
             while length(active_neurons) < n*size(all_active_neurons, 2)
-                temp = all_active_neurons(row, col);
+                temp_index = all_active_neurons(row, col);
+                temp = neurons(temp_index);
                 
                 if isempty(find(active_neurons == temp, 1))
                     active_neurons = [active_neurons temp];
                     
-                    if length(active_neurons) == col*n
-                        col = col + 1;
-                        row = 0;
+                    if col == size(all_active_neurons, 2)
+                        row = row + 1;
+                        col = 0;
+                    end
+                else
+                    if col == size(all_active_neurons, 2)
+                        row = row + 1;
+                        col = 0;
                     end
                 end
                 
-                row = row + 1;
+                col = col + 1;
             end 
         end
         

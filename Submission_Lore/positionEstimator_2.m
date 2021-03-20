@@ -9,7 +9,7 @@ function [x, y, modelParameters] = positionEstimator_2(test_data, modelParameter
   scale = zeros(2, 1);
   
   if time_point == 1
-      init_spikes = sum(spikes(modelParameters.neurons, 1:length_), 2);
+      init_spikes = sum(test_data.spikes(modelParameters.neurons, 1:len), 2);
       angle_n = predict(modelParameters.classifier1, init_spikes');
       modelParameters.angle_n = angle_n;
            
@@ -39,13 +39,13 @@ function [x, y, modelParameters] = positionEstimator_2(test_data, modelParameter
   end
   
   if time_point <= size(modelParameters.traces, 3)
-      if size(spikes, 2) == 360
-          init_spikes = sum(spikes(modelParameters.eccoli, 1:360), 2);
+      if size(test_data.spikes, 2) == 360
+          init_spikes = sum(test_data.spikes(modelParameters.eccoli, 1:360), 2);
           modelParameters.angle_n = predict(modelParameters.classifier2, init_spikes');
       end
       
-      if size(spikes, 2) == 400
-          init_spikes = sum(spikes(modelParameters.eccoli, 1:400), 2);
+      if size(test_data.spikes, 2) == 400
+          init_spikes = sum(test_data.spikes(modelParameters.eccoli, 1:400), 2);
           modelParameters.angle_n = predict(modelParameters.classifier3, init_spikes');
       end
       
