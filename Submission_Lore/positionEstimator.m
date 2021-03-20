@@ -30,7 +30,7 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
       if test_data.startHandPos(2, 1) < modelParameters.initial(2, modelParameters.angle_n)
           noise(2, 1) = -1;
           scale(2, 1) = abs(test_data.startHandPos(2, 1) - modelParameters.initial(2, modelParameters.angle_n));
-      elseif test_data.startHandPos(2, 1) == modelParameters.initial(2, angle_n)
+      elseif test_data.startHandPos(2, 1) == modelParameters.initial(2, modelParameters.angle_n)
           noise(2, 1) = 0;
           scale(2, 1) = abs(test_data.startHandPos(2, 1) - modelParameters.initial(2, modelParameters.angle_n));
       elseif test_data.startHandPos(2, 1) > modelParameters.initial(2, modelParameters.angle_n)

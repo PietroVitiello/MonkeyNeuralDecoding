@@ -213,5 +213,19 @@ classdef Processing
             end
         end
         
+        function distribution = firingDistribution(~, trial, start, stop)
+            n_n = size(trial, 3);
+            
+            avg_activity = squeeze(mean(mean( ...
+                           trial(:, :, :, start:stop) ...
+                           , 4), 1))';
+            
+            sum_activity = sum(avg_activity, 1);
+            
+            distribution = avg_activity ./ ...
+                           repmat(sum_activity, n_n, 1);
+            
+        end
+        
     end
 end
