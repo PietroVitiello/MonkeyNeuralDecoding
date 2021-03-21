@@ -17,10 +17,10 @@ function [modelParameters] = positionEstimatorTraining_6(training_data)
 
   neurons_per_angle = 12;
   %[active_neurons active_neurons_matrix] = processor.mostActive(clean_trial, neurons_per_angle, clean_neurons);
-  [active_neurons active_neurons_matrix] = processor.mostActive(training_data, neurons_per_angle, 1:98);
+  [active_neurons, active_neurons_matrix] = processor.mostActive(training_data, neurons_per_angle, 1:98);
   eccoli_qui = 1:98; %processor.mostActive(clean_trial, 4, 300, 400);
 
-  [samples, labels] = processor.create_dataset(training_data, active_neurons, 320, 1);
+  [samples, labels] = processor.create_dataset(training_data, eccoli_qui, 320, 1);
   [samples2, labels2] = processor.create_dataset(training_data, eccoli_qui, 360, 1);
   [samples3, labels3] = processor.create_dataset(training_data, eccoli_qui, 400, 1);
   
@@ -32,13 +32,25 @@ function [modelParameters] = positionEstimatorTraining_6(training_data)
   [trials, ~] = processor.get_data_matrix(training_data);
   templates = a_classifier.firingTemplate(trials, 300, 1);
   
+  av_diffs = processor.get_dataset_2(templates, trials, eccoli_qui, 320, 1);
+  samples = [samples av_diffs.*20];
+  
+  temp = [samples labels];
+  rand_d = temp(randperm(size(temp, 1)), :);
+  samples = rand_d(:, 1:size(samples, 2));
+  labels = rand_d(:, size(samples, 2)+1);
+  [Mdl4, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);
+  
   angle_distributions = processor.firingDistribution(trials, 1, 320);
   
   par = a_classifier.neuronDistribution_mle(trials, 1, 300);
   
+  average_spike_trains = processor.averageTrial(trials, active_neurons, 1, 300);
+  
   modelParameters.classifier1 = Mdl1;
   modelParameters.classifier2 = Mdl2;
   modelParameters.classifier3 = Mdl3;
+  modelParameters.classifier4 = Mdl4;
   modelParameters.neurons = active_neurons;
   modelParameters.neuron_matrix = active_neurons_matrix;
   modelParameters.classifier = a_classifier;
