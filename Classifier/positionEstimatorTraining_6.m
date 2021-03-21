@@ -15,7 +15,7 @@ function [modelParameters] = positionEstimatorTraining_6(training_data)
   %silent_neurons = [2 5 6 8 10 11 19 20 21 23 24 25 26 28 30 35 37 38 39 42 44 46 49 52 53 54 58 59 60 62 63 64 70 73 74 76 79 82 83 84 90 95 97]; %Threshold of 15
   %[clean_trial, clean_neurons] = processor.clean_dataset(training_data, silent_neurons);
 
-  neurons_per_angle = 12;
+  neurons_per_angle = 10;
   %[active_neurons active_neurons_matrix] = processor.mostActive(clean_trial, neurons_per_angle, clean_neurons);
   [active_neurons, active_neurons_matrix] = processor.mostActive(training_data, neurons_per_angle, 1:98);
   eccoli_qui = 1:98; %processor.mostActive(clean_trial, 4, 300, 400);
@@ -45,7 +45,8 @@ function [modelParameters] = positionEstimatorTraining_6(training_data)
   
   par = a_classifier.neuronDistribution_mle(trials, 1, 300);
   
-  average_spike_trains = processor.averageTrial(trials, active_neurons, 1, 300);
+  
+  average_spike_trains = processor.averageTrial(trials, active_neurons, 1, 320);
   
   modelParameters.classifier1 = Mdl1;
   modelParameters.classifier2 = Mdl2;
@@ -58,5 +59,6 @@ function [modelParameters] = positionEstimatorTraining_6(training_data)
   modelParameters.templates = templates;
   modelParameters.distributions = angle_distributions;
   modelParameters.par = par;
+  modelParameters.training_average = average_spike_trains;
   
 end

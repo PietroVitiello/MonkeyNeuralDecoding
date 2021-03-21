@@ -331,9 +331,9 @@ classdef Processing
         end
         
         function average_activity = averageTrial(~, trial, neurons, start, stop)
-            average_activity = zeros(length(neurons), (stop - start - 1), 8);
+            average_activity = zeros(length(neurons), (stop - start + 1), 8);
             for angle_i = 1:8
-                average_activity(:, :, 8) = mean(trial(:, angle_i, neurons, start:stop), 1);
+                average_activity(:, :, angle_i) = mean(trial(:, angle_i, neurons, start:stop), 1);
             end
         end
         
