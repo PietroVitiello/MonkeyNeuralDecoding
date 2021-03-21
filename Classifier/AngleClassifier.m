@@ -539,6 +539,58 @@ classdef AngleClassifier
         end
         
         
+        function templates = firingTemplate_2n3D(~, trial, stop, start, bin_size)
+            [n_tr, n_a, n_n, ~] = size(trial);
+            n_bin = (stop-start+1)/bin_size;
+            trial = trial(:,:,:,start:stop);
+            
+            templates = movsum(trial, bin_size, 4, 'Endpoints','discard');
+            templates = reshape( ...
+                        templates(:,:,:,1:bin_size:end) ...
+                        , n_tr, n_a, n_n*n_bin);
+            
+            templates = cat(3, mean(trial, 4), templates);
+            templates = cat(3, ...
+                        templates(:,:,1:n_n) ./ ...
+                        repmat(sum(templates(:,:,1:n_n),3) ...
+                        , 1,1,n_n)...
+                        , templates);
+%             templates(:,:,n_n+1:end) = templates(:,:,n_n+1:end) ./ ...
+%                                        repmat(templates(:,:,1:n_n), 1,1,n_bin);
+            
+            assignin('base', 'ww', repmat(templates(:,:,1:n_n), 1,1,n_bin))
+                                   
+            templates = squeeze(mean(templates, 1));
+%             templates(isnan(templates)) = 0;
+            size(templates);
+            
+            assignin('base', 'qq', templates')
+                    
+        end
+        
+        
+        function angle = findSimilarAngle_2n3D(~, templates, spikes, stop, start, bin_size)
+            n_n = size(spikes, 1);
+            n_bin = (stop-start+1)/bin_size;
+            spikes = spikes(:,start:stop);
+            
+            B = movsum(spikes, bin_size, 2, 'Endpoints','discard');
+            B = reshape(B(:,1:bin_size:end), n_n*n_bin, 1);
+            B = [mean(spikes, 2) ; B];
+            B = [B(1:n_n) ./ repmat(sum( ...
+                B(1:n_n)), n_n, 1); B];
+%             size(B)
+%             size(repmat(B(1:n_n), n_bin, 1))
+%             B(n_n+1:end) = B(n_n+1:end) ./ repmat(B(1:n_n), n_bin, 1);
+%             B(isnan(B)) = 0;
+            
+            [~, angle] = min(sum(abs(templates - ...
+                         repmat(B, 1, 8)' ...
+                         ), 2));
+            
+        end
+        
+        
         
         
     end
