@@ -155,11 +155,11 @@ classdef AngleClassifier
             
             [tr_train, n_angles, d, ~] = size(train_matrix);
             
-            ind = reshape(repmat(...
-                  [1:d/bin_size]', 1, bin_size)' ...
-                  , d, 1);
-              
-            permute(repmat(ind, 1, n_angles, tr_train), [3 2 1]);
+%             ind = reshape(repmat(...
+%                   [1:d/bin_size]', 1, bin_size)' ...
+%                   , d, 1);
+%               
+%             permute(repmat(ind, 1, n_angles, tr_train), [3 2 1]);
             
             %%% FITTING %%%
             
@@ -510,6 +510,31 @@ classdef AngleClassifier
             
             [~, angle] = max(likelihood - vector');
             
+            
+        end
+        
+        
+        function templates = firingTemplate_3D(~, trial, stop, start, bin_size)
+            trial = trial(:,:,:,start:stop);
+            templates = movsum(trial, bin_size, 4, 'Endpoints','discard');
+            templates = templates(:,:,:,1:bin_size:end);
+            
+            templates = squeeze(mean(templates, 1));
+                    
+        end
+        
+        
+        function angle = findSimilarAngle_3D(~, templates, spikes, stop, start, bin_size)
+            spikes = spikes(:,start:stop);
+            B = movsum(spikes, bin_size, 2, 'Endpoints','discard');
+            B = B(:,1:bin_size:end);
+            
+            angle_dissim = sum(abs(templates - ...
+                           permute(repmat(B, 1, 1, 8),[3 1 2]) ...
+                           ),2);
+            bin_sum = sum(angle_dissim, 1);
+            angle_dissim = angle_dissim ./ repmat(bin_sum,8,1);
+            [~, angle] = min(sum(angle_dissim, 3));
             
         end
         
