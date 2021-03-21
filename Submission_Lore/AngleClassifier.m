@@ -229,6 +229,15 @@ classdef AngleClassifier
             
         end
         
+        function templates = firingTemplate_3D(~, trial, stop, start, bin_size)
+            trial = trial(:,:,:,start:stop);
+            templates = movsum(trial, bin_size, 4, 'Endpoints','discard');
+            templates = templates(:,:,:,1:bin_size:end);
+            
+            templates = squeeze(mean(templates, 1));
+                    
+        end
+        
     end
     
 end
