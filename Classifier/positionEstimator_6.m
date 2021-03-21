@@ -3,7 +3,7 @@ function [angle, modelParameters] = positionEstimator_6(test_data, modelParamete
   spikes = test_data.spikes;
   length_ = 320;
   classifier = modelParameters.classifier;
-  angle_array = zeros(6, 1);
+  angle_array = zeros(7, 1);
   if size(spikes, 2) <= length_
       init_spikes = sum(spikes(modelParameters.eccoli, 1:length_), 2);
       angle_array(1, 1) = predict(modelParameters.classifier1, init_spikes');
@@ -27,7 +27,7 @@ function [angle, modelParameters] = positionEstimator_6(test_data, modelParamete
       
       angle_array(6, 1) = classifier.SimilarityMLE(modelParameters.templates, modelParameters.par, test_data.spikes, 300, 1);
       
-      %angle_array(1, 1) = classifier.compareAverage(modelParameters.training_average, spikes, modelParameters.neurons);
+      angle_array(7, 1) = classifier.findSimilarAngle_3D(modelParameters.templates1, test_data.spikes, 300, 1, 150);
       
       [most_freq num_occ] = mode(angle_array);
 

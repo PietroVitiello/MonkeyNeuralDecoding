@@ -45,8 +45,7 @@ function [modelParameters] = positionEstimatorTraining_6(training_data)
   
   par = a_classifier.neuronDistribution_mle(trials, 1, 300);
   
-  
-  average_spike_trains = processor.averageTrial(trials, active_neurons, 1, 320);
+  templates1 = a_classifier.firingTemplate_3D(trials, 300, 1, 150);
   
   modelParameters.classifier1 = Mdl1;
   modelParameters.classifier2 = Mdl2;
@@ -59,6 +58,6 @@ function [modelParameters] = positionEstimatorTraining_6(training_data)
   modelParameters.templates = templates;
   modelParameters.distributions = angle_distributions;
   modelParameters.par = par;
-  modelParameters.training_average = average_spike_trains;
+  modelParameters.templates1 = templates1;
   
 end

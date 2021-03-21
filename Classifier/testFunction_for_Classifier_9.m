@@ -8,7 +8,7 @@ function n_different_tests = testFunction_for_Classifier_9(teamName)
 
 load monkeydata0.mat
 
-n_different_tests = 30;
+n_different_tests = 50;
 correct_first = 0;
 correct_final = 0;
 
