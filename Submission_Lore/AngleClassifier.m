@@ -238,6 +238,20 @@ classdef AngleClassifier
                     
         end
         
+        function angle = findSimilarAngle_3D(~, templates, spikes, stop, start, bin_size)
+            spikes = spikes(:,start:stop);
+            B = movsum(spikes, bin_size, 2, 'Endpoints','discard');
+            B = B(:,1:bin_size:end);
+            
+            angle_dissim = sum(abs(templates - ...
+                           permute(repmat(B, 1, 1, 8),[3 1 2]) ...
+                           ),2);
+            bin_sum = sum(angle_dissim, 1);
+            angle_dissim = angle_dissim ./ repmat(bin_sum,8,1);
+            [~, angle] = min(sum(angle_dissim, 3));
+            
+        end
+        
     end
     
 end
