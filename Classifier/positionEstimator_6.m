@@ -8,19 +8,24 @@ function [angle, modelParameters] = positionEstimator_6(test_data, modelParamete
       init_spikes = sum(spikes(modelParameters.neurons, 1:length_), 2);
       angle(1, 1) = predict(modelParameters.classifier1, init_spikes');
       
-      angle(2, 1) = classifier.findSimilarAngle2(modelParameters.templates, test_data.spikes, 300, 1);
+      angle(2, 1) = classifier.findSimilarAngle2(modelParameters.templates, test_data.spikes, 320, 1);
       
       angle(3, 1) = classifier.similarityDistributions(...
               modelParameters.templates, modelParameters.distributions ...
               , test_data.spikes, 1, 300);
       
       angle(4, 1) = classifier.apply_nDistribution_mle(test_data.spikes, ...
-                                                 modelParameters.par, 1, 300);
+                                                 modelParameters.par, 1, 320);
       
       [most_freq num_occ] = mode(angle);
 
       modelParameters.angle_n = most_freq;
-      disp(angle);
+%       if (num_occ <= 2) && (size(unique(angle), 1) == 2) && (angle(1, 1) ~= angle(3, 1))
+%           modelParameters.angle_n = angle(3, 1);
+%       end
+      if (size(unique(angle), 1)) == 1
+          disp('======');
+      end
 %   else
 %       if size(spikes, 2) == 360
 %           init_spikes = sum(spikes(modelParameters.eccoli, 1:360), 2);

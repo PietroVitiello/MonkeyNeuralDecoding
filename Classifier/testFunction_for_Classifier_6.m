@@ -8,7 +8,7 @@ function n_different_tests = testFunction_for_Classifier_6(teamName)
 
 load monkeydata0.mat
 
-n_different_tests = 50;
+n_different_tests = 20;
 correct_first = 0;
 correct_final = 0;
 
@@ -52,7 +52,7 @@ for test = 1:n_different_tests
                 elseif t == times(end)
                     correct_final = correct_final + (angle == direc);
                 end
-                if angle ~= direc
+                if angle ~= direc && t == 320
                     disp('#########################')
                 end
             end
