@@ -1,4 +1,4 @@
-function [modelParameters] = positionEstimatorTraining(training_data)
+function [modelParameters] = positionEstimatorTraining_6(training_data)
   % Arguments:
  
   % - training_data:
@@ -29,6 +29,13 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   [Mdl2, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples2, labels2);
   [Mdl3, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples3, labels3);
   
+  [trials, ~] = processor.get_data_matrix(training_data);
+  templates = a_classifier.firingTemplate(trials, 300, 1);
+  
+  angle_distributions = processor.firingDistribution(trials, 1, 320);
+  
+  par = a_classifier.neuronDistribution_mle(trials, 1, 300);
+  
   modelParameters.classifier1 = Mdl1;
   modelParameters.classifier2 = Mdl2;
   modelParameters.classifier3 = Mdl3;
@@ -36,5 +43,8 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   modelParameters.neuron_matrix = active_neurons_matrix;
   modelParameters.classifier = a_classifier;
   modelParameters.eccoli = eccoli_qui;
+  modelParameters.templates = templates;
+  modelParameters.distributions = angle_distributions;
+  modelParameters.par = par;
   
 end
