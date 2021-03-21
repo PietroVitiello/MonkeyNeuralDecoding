@@ -11,7 +11,8 @@ load monkeydata0.mat
 n_different_tests = 20;
 correct_first = 0;
 correct_final = 0;
-
+count_guess_error = zeros(1, 8);
+count_correct_error = zeros(1, 8);
 for test = 1:n_different_tests
     % Set random number generator
     %rng(2013);
@@ -53,12 +54,22 @@ for test = 1:n_different_tests
                     correct_final = correct_final + (angle == direc);
                 end
                 if angle ~= direc && t == 320
-                    disp('#########################')
+                    disp('£££££££££££££££££££')
+                    for i = 1:8
+                        if angle == i
+                            count_guess_error(1, i) = count_guess_error(1, i) + 1;
+                        end
+                        if direc == i 
+                            count_correct_error(1, i) = count_correct_error(1, i) + 1;
+                        end
+                    end
                 end
             end
         end
     end
 end
+count_guess_error
+count_correct_error
 
 fprintf('\n\nCorrect predictions at the beginning: %.3f out of %d', correct_first/n_different_tests, n_predictions);
 
