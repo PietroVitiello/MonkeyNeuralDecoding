@@ -16,7 +16,6 @@ classdef Processing
         end
         
         
-              
         function [active_neurons, active_neuron_matrix] = mostActive(~, trial, n, neurons, lower_bound, upper_bound)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -270,7 +269,6 @@ classdef Processing
             [pref_mag, pref_neuron] = sort(distribution, 'descend');
             
         end
-        
         
         function activity = overallActivity(~, trial, start, stop)
             activity = squeeze(sum(mean( ...
