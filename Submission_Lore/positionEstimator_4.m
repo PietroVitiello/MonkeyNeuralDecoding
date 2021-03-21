@@ -9,24 +9,26 @@ function [x, y, modelParameters] = positionEstimator_4(test_data, modelParameter
   time_point = (len-300)/20;
   noise = zeros(2, 1);
   scale = zeros(2, 1);
-  angle = zeros(3, 1);
+  angle = zeros(1, 1);
   
   if time_point == 1
-      angle(1, 1) = classifier.similarityDistributions(...
-              modelParameters.templates, modelParameters.distributions ...
-              , test_data.spikes, 1, 300);
+%       angle(1, 1) = classifier.similarityDistributions(...
+%               modelParameters.templates, modelParameters.distributions ...
+%               , test_data.spikes, 1, 300);
+%       
+%       init_spikes = sum(test_data.spikes(1:98, 1:len), 2);
+%       angle(2, 1) = predict(modelParameters.classifier1, init_spikes');
+%       
+%       angle(3, 1) = classifier.findSimilarAngle2(modelParameters.templates, test_data.spikes, 300, 1);
       
-      init_spikes = sum(test_data.spikes(1:98, 1:len), 2);
-      angle(2, 1) = predict(modelParameters.classifier1, init_spikes');
-      
-      angle(3, 1) = classifier.findSimilarAngle2(modelParameters.templates, test_data.spikes, 300, 1);
+      angle(1, 1) = classifier.findSimilarAngle_3D(modelParameters.templates1, test_data.spikes, 300, 1, 150);
       
       modelParameters.angle_n = mode(angle);
       
-      if (angle(1, 1) ~= angle(2, 1)) || (angle(1, 1) ~= angle(3, 1)) || (angle(2, 1) ~= angle(3, 1))
-          modelParameters.angle_n = angle(1, 1);
-          disp('################################"')
-      end
+%       if (angle(1, 1) ~= angle(2, 1)) || (angle(1, 1) ~= angle(3, 1)) || (angle(2, 1) ~= angle(3, 1))
+%           modelParameters.angle_n = angle(1, 1);
+%           disp('################################"')
+%       end
       
       if test_data.startHandPos(1, 1) < modelParameters.initial(1, modelParameters.angle_n)
           noise(1, 1) = -1;
