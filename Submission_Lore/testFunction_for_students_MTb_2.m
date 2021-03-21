@@ -8,7 +8,7 @@ function [average_RMSE, n_different_tests] = testFunction_for_students_MTb_2(tea
 
 load monkeydata0.mat
 
-n_different_tests = 40;
+n_different_tests = 20;
 RMSE_runs = zeros(1, n_different_tests);
 correct_first = 0;
 correct_final = 0;
