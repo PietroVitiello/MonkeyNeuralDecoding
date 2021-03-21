@@ -18,6 +18,7 @@ distributions = process.firingDistribution(trials, 1, 320);
 
 %% Find preference
 [pref_mag, pref_neuron, ~] = process.anglePreference(trials, 1, 320);
+nana = sum(pref_mag);
 
 %% test neuron distribution mle
 par = classifier.neuronDistribution_mle(trials, 1, 300);
