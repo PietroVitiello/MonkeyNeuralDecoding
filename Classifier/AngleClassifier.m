@@ -513,6 +513,14 @@ classdef AngleClassifier
             
         end
         
+        function angle = compareAverage(~, training_average, test_trial, neurons)
+            MSE_vector = zeros(1, 8);
+            for i = 1:size(MSE_vector, 2)
+                MSE_vector(1, i) = immse(training_average(:, :, i), test_trial(neurons, :));
+            end
+            [~, angle] = min(MSE_vector);
+            MSE_vector;
+        end
         
         function templates = firingTemplate_3D(~, trial, stop, start, bin_size)
             trial = trial(:,:,:,start:stop);
@@ -589,7 +597,6 @@ classdef AngleClassifier
                          ), 2));
             
         end
-        
         
         
         

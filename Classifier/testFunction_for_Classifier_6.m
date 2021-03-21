@@ -8,7 +8,7 @@ function n_different_tests = testFunction_for_Classifier_6(teamName)
 
 load monkeydata0.mat
 
-n_different_tests = 20;
+n_different_tests = 50;
 correct_first = 0;
 correct_final = 0;
 count_guess_error = zeros(1, 8);
@@ -54,7 +54,7 @@ for test = 1:n_different_tests
                     correct_final = correct_final + (angle == direc);
                 end
                 if angle ~= direc && t == 320
-                    disp('£££££££££££££££££££')
+                    %disp('£££££££££££££££££££')
                     for i = 1:8
                         if angle == i
                             count_guess_error(1, i) = count_guess_error(1, i) + 1;
