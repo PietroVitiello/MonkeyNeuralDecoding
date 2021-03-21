@@ -19,9 +19,14 @@ function [x, y, modelParameters] = positionEstimator_4(test_data, modelParameter
       init_spikes = sum(test_data.spikes(1:98, 1:len), 2);
       angle(2, 1) = predict(modelParameters.classifier1, init_spikes');
       
+      angle(3, 1) = classifier.findSimilarAngle2(modelParameters.templates, test_data.spikes, 300, 1);
       
-
       modelParameters.angle_n = mode(angle);
+      
+      if (angle(1, 1) ~= angle(2, 1)) || (angle(1, 1) ~= angle(3, 1)) || (angle(2, 1) ~= angle(3, 1))
+          modelParameters.angle_n = angle(1, 1);
+          disp('################################"')
+      end
       
       if test_data.startHandPos(1, 1) < modelParameters.initial(1, modelParameters.angle_n)
           noise(1, 1) = -1;
@@ -48,36 +53,12 @@ function [x, y, modelParameters] = positionEstimator_4(test_data, modelParameter
       modelParameters.scale = scale;
   end
   
-  if time_point <= size(modelParameters.traces, 3)
-      if len == 360
-        angle(1, 1) = classifier.similarityDistributions(...
-              modelParameters.templates, modelParameters.distributions ...
-              , test_data.spikes, 1, len);
-        
-        init_spikes = sum(test_data.spikes(1:98, :), 2);
-        angle(2, 1) = predict(modelParameters.classifier2, init_spikes');
-        
-        
-        
-        modelParameters.angle_n = mode(angle);
-      end
-      
-      if len == 400
-        angle(1, 1) = classifier.similarityDistributions(...
-              modelParameters.templates, modelParameters.distributions ...
-              , test_data.spikes, 1, len);  
-        
-        init_spikes = sum(test_data.spikes(1:98, :), 2);
-        angle(2, 1) = predict(modelParameters.classifier3, init_spikes');
-        
-        modelParameters.angle_n = mode(angle)
-      end
-      
+  if time_point <= size(modelParameters.traces, 3)   
       x = modelParameters.traces(modelParameters.angle_n, 1, time_point) + modelParameters.noise(1, 1)*modelParameters.deviation(modelParameters.angle_n, 1, time_point)*modelParameters.scale(1, 1)/7.5;
       y = modelParameters.traces(modelParameters.angle_n, 2, time_point) + modelParameters.noise(2, 1)*modelParameters.deviation(modelParameters.angle_n, 2, time_point)*modelParameters.scale(2, 1)/7.5;
   else
       x = modelParameters.objectives(1, modelParameters.angle_n);
       y = modelParameters.objectives(2, modelParameters.angle_n);
   end
- 
+
 end
