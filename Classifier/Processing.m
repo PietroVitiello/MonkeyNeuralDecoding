@@ -145,9 +145,9 @@ classdef Processing
                 dataset(traj_count, :) = temp;
                 end
             end
-            rand_d = dataset(randperm(size(dataset, 1)), :);
-            samples = rand_d(:, 1:length(active_neurons));
-            labels = rand_d(:, length(active_neurons)+1);
+            % rand_d = dataset(randperm(size(dataset, 1)), :);
+            samples = dataset(:, 1:length(active_neurons));
+            labels = dataset(:, length(active_neurons)+1);
         end
         
         
@@ -218,6 +218,60 @@ classdef Processing
             end
         end
         
+        function [firing_rates, angles] = get_dataset(~, templates, data_matrix, neurons_selected, start, stop)
+            if nargin == 4
+                start = 1;
+                stop = 300;
+            end
+            
+            if nargin < 4
+                start = 1;
+                stop = 300;
+                neurons_selected = 1:size(data_matrix, 3);
+            end
+            
+            firing_rates = zeros(size(data_matrix, 1)*size(data_matrix, 2)*size(data_matrix, 2), length(neurons_selected));
+            angles = zeros(size(data_matrix, 1)*size(data_matrix, 2), 1);
+            idx = 0;
+            for angle_n = 1:size(data_matrix, 2)
+                for trial_n = 1:size(data_matrix, 1)
+                    for i = 1:1:size(data_matrix, 2)
+                        idx = idx + 1;
+                        firing_rates(idx, :) = templates(i, :) - (sum(squeeze(data_matrix(trial_n, angle_n, neurons_selected, start:stop)), 2)./(stop-start+1))';
+                        angles(idx) = angle_n;
+                    end
+                end
+            end
+            temp = [firing_rates angles];
+            rand_d = temp(randperm(size(temp, 1)), :);
+            firing_rates = rand_d(:, 1:size(firing_rates, 2));
+            angles = rand_d(:, size(firing_rates, 2)+1);
+            
+        end
+        
+        function av_diff = get_dataset_2(~, templates, data_matrix, neurons_selected, stop, start)
+            if nargin < 5 
+                start = 1;
+                stop = 300;
+            end
+            
+            if nargin < 4
+                neurons_selected = 1:size(data_matrix, 3);
+            end
+            
+            av_diff = zeros(size(data_matrix, 1)*size(data_matrix, 2), size(data_matrix, 2));
+            idx = 1;
+            for trial_n = 1:size(data_matrix, 1)
+                for angle_n = 1:size(data_matrix, 2)
+                    temp = zeros(1, size(data_matrix, 2));
+                    for i = 1:size(data_matrix, 2)
+                        temp(1, i) = mean(abs(templates(i, :) - (sum(squeeze(data_matrix(trial_n, angle_n, neurons_selected, start:stop)), 2)./(stop-start+1))'));
+                    end
+                    av_diff(idx, :) = temp;
+                    idx = idx + 1;
+                end
+            end
+        end
         
         function specific_neurons = mostSpecific(~, trial, start, stop, neuronsXangle)
             n_a = size(trial, 2);
@@ -278,4 +332,6 @@ classdef Processing
         
         
     end
+    
+    
 end
