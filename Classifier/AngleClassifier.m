@@ -48,6 +48,13 @@ classdef AngleClassifier
             end
         end
         
+        function Mdl = knn_classifier_(~, k, varargin)
+            train_samples = varargin{1};
+            train_labels = varargin{2};
+            Mdl = fitcknn(train_samples,train_labels,'NumNeighbors',k);
+        end
+        
+        
         
         function [estimated_angles, true_angles] = likelihood(~, train_matrix, test_matrix)
             
@@ -225,6 +232,7 @@ classdef AngleClassifier
                     
         end
         
+        
         function templates = firingTemplate2(~, trial, stop, start, last_scale)
             
             n_a = size(trial, 2);
@@ -251,6 +259,7 @@ classdef AngleClassifier
 %                         , 4), 1));
                     
         end
+        
         
         function angle = findSimilarAngle(~, templates, spikes, stop, start)
             

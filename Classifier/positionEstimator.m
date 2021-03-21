@@ -6,8 +6,8 @@ function [angle, modelParameters] = positionEstimator(test_data, modelParameters
   classifier = modelParameters.classifier;
   if size(spikes, 2) <= length_
       init_spikes = sum(spikes(modelParameters.neurons, 1:length_), 2);
-      %angle_n = predict(modelParameters.classifier1, init_spikes');
-      angle_n = classifier.closestFiring(modelParameters.neuron_matrix, spikes, 1, 320);
+      angle_n = predict(modelParameters.classifier1, init_spikes');
+      %angle_n = classifier.closestFiring(modelParameters.neuron_matrix, spikes, 1, 320);
       modelParameters.angle_n = angle_n;
   else
       if size(spikes, 2) == 360

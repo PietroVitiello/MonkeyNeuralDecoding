@@ -16,7 +16,6 @@ classdef Processing
         end
         
         
-              
         function [active_neurons, active_neuron_matrix] = mostActive(~, trial, n, neurons, lower_bound, upper_bound)
             %{
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -91,6 +90,39 @@ classdef Processing
             end 
         end
         
+        function most_active = mostActiveV2(~, data_matrix)
+            most_active = zeros(size(data_matrix,3), size(data_matrix,2));
+            diffs = zeros(size(data_matrix, 3), 3);
+            mean_fr = zeros(size(data_matrix,3), size(data_matrix,1));
+            for neuron_n = 1:size(data_matrix,3)
+                for trial_n = 1:size(data_matrix,1)
+                    for angle_n = 1:size(data_matrix,2)
+                        mean_fr(neuron_n, angle_n) = mean_fr(neuron_n, angle_n) + sum(data_matrix(trial_n, angle_n, neuron_n, 1:300));
+                    end
+                end
+                mean_fr(neuron_n, :) = mean_fr(neuron_n, :)./size(data_matrix,1);
+                [fr_sorted, idxs] = sort(mean_fr(neuron_n, :), 'descend');
+                diffs(neuron_n, 1) = (fr_sorted(1) - fr_sorted(2))/fr_sorted(1);
+                diffs(neuron_n, 2) = neuron_n; 
+                diffs(neuron_n, 3) = idxs(1);
+            end
+            diffs = sortrows(diffs, 3);
+            idx = 1;
+            for angle_n = 1:size(data_matrix,2)
+                count = 0;
+                while diffs(idx,3) == angle_n 
+                    count = count + 1;
+                    if idx < size(diffs, 1)
+                        idx = idx + 1;
+                    else
+                        break
+                    end
+                end
+                temp = diffs(idx - count: idx-1, 1:2);
+                temp = sortrows(temp, 1);
+                most_active(1:size(temp,1), angle_n) = temp(:, 2);
+            end
+        end
         
         function [samples, labels] = create_dataset(~, trial, active_neurons, length_premotor, start_premotor)
             if nargin < 4
@@ -113,9 +145,9 @@ classdef Processing
                 dataset(traj_count, :) = temp;
                 end
             end
-            rand_d = dataset(randperm(size(dataset, 1)), :);
-            samples = rand_d(:, 1:length(active_neurons));
-            labels = rand_d(:, length(active_neurons)+1);
+            % rand_d = dataset(randperm(size(dataset, 1)), :);
+            samples = dataset(:, 1:length(active_neurons));
+            labels = dataset(:, length(active_neurons)+1);
         end
         
         
@@ -175,9 +207,7 @@ classdef Processing
         end
         
         function [spikes_matrix, labels_matrix]  = get_data_matrix(~, trial)
-            
             min_length = 571;
-            
             spikes_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).spikes, 1), min_length);
             labels_matrix = zeros(size(trial,1), size(trial,2), size(trial(1,1).handPos, 1)-1, min_length);
             for trial_n = 1:size(trial,1)
@@ -188,6 +218,60 @@ classdef Processing
             end
         end
         
+        function [firing_rates, angles] = get_dataset(~, templates, data_matrix, neurons_selected, start, stop)
+            if nargin == 4
+                start = 1;
+                stop = 300;
+            end
+            
+            if nargin < 4
+                start = 1;
+                stop = 300;
+                neurons_selected = 1:size(data_matrix, 3);
+            end
+            
+            firing_rates = zeros(size(data_matrix, 1)*size(data_matrix, 2)*size(data_matrix, 2), length(neurons_selected));
+            angles = zeros(size(data_matrix, 1)*size(data_matrix, 2), 1);
+            idx = 0;
+            for angle_n = 1:size(data_matrix, 2)
+                for trial_n = 1:size(data_matrix, 1)
+                    for i = 1:1:size(data_matrix, 2)
+                        idx = idx + 1;
+                        firing_rates(idx, :) = templates(i, :) - (sum(squeeze(data_matrix(trial_n, angle_n, neurons_selected, start:stop)), 2)./(stop-start+1))';
+                        angles(idx) = angle_n;
+                    end
+                end
+            end
+            temp = [firing_rates angles];
+            rand_d = temp(randperm(size(temp, 1)), :);
+            firing_rates = rand_d(:, 1:size(firing_rates, 2));
+            angles = rand_d(:, size(firing_rates, 2)+1);
+            
+        end
+        
+        function av_diff = get_dataset_2(~, templates, data_matrix, neurons_selected, stop, start)
+            if nargin < 5 
+                start = 1;
+                stop = 300;
+            end
+            
+            if nargin < 4
+                neurons_selected = 1:size(data_matrix, 3);
+            end
+            
+            av_diff = zeros(size(data_matrix, 1)*size(data_matrix, 2), size(data_matrix, 2));
+            idx = 1;
+            for trial_n = 1:size(data_matrix, 1)
+                for angle_n = 1:size(data_matrix, 2)
+                    temp = zeros(1, size(data_matrix, 2));
+                    for i = 1:size(data_matrix, 2)
+                        temp(1, i) = mean(abs(templates(i, :) - (sum(squeeze(data_matrix(trial_n, angle_n, neurons_selected, start:stop)), 2)./(stop-start+1))'));
+                    end
+                    av_diff(idx, :) = temp;
+                    idx = idx + 1;
+                end
+            end
+        end
         
         function specific_neurons = mostSpecific(~, trial, start, stop, neuronsXangle)
             n_a = size(trial, 2);
@@ -240,7 +324,6 @@ classdef Processing
             
         end
         
-        
         function activity = overallActivity(~, trial, start, stop)
             activity = squeeze(sum(mean( ...
                        trial(:,:,:,start:stop) ...
@@ -249,4 +332,6 @@ classdef Processing
         
         
     end
+    
+    
 end
