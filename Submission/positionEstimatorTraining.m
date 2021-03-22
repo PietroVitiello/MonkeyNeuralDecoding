@@ -1,4 +1,5 @@
 function [modelParameters] = positionEstimatorTraining(training_data)
+<<<<<<< HEAD
   % Arguments:
  
   % - training_data:
@@ -21,49 +22,88 @@ function [modelParameters] = positionEstimatorTraining(training_data)
   processor = Processing();
   trj = Trajectory();
   a_classifier = AngleClassifier();
-  
-  initial_pos = processor.get_data_matrix_initial(training_data);
-  [trials, pos] = processor.get_data_matrix(training_data);
-  final_pos = processor.get_data_matrix_final(training_data);
-  
-%   templates1 = a_classifier.firingTemplate_3D(trials, 300, 1, 150);
-%   
-%   templates = a_classifier.firingTemplate(trials, 300, 1);
-%   angle_distributions = processor.firingDistribution(trials, 1, 320);
-%   
-%   [samples, labels] = processor.create_dataset(training_data, 1:98, 320, 1);
-%   [samples2, labels2] = processor.create_dataset(training_data, 1:98, 360, 1);
-%   [samples3, labels3] = processor.create_dataset(training_data, 1:98, 400, 1);
-%   n_neighbours = 28;
-%   [Mdl1, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);  
-%   [Mdl2, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples2, labels2);
-%   [Mdl3, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples3, labels3);
-  
-  templates2 = a_classifier.firingTemplate_2n3D(trials, 300, 1, 100);
-%   templates3 = a_classifier.firingTemplate_2n3D(trials, 360, 1, 120);
-  templates4 = a_classifier.firingTemplate_2n3D(trials, 400, 1, 100);
-%   templates5 = a_classifier.firingTemplate_2n3D(trials, 440, 1, 110);
-  templates6 = a_classifier.firingTemplate_2n3D(trials, 500, 1, 125);
-  
-  start = trj.initial_positions(initial_pos);
-  [avgT, stdT] = trj.averageTrajectory(pos);
-  obj = trj.objective_positions(final_pos);
-  
-  modelParameters.initial = start;
-  modelParameters.traces = avgT;
-  modelParameters.deviation = stdT;
-  modelParameters.objectives = obj;
-  modelParameters.classifier = a_classifier;
-%   modelParameters.classifier1 = Mdl1;
-%   modelParameters.classifier2 = Mdl2;
-%   modelParameters.classifier3 = Mdl3;
-%   modelParameters.templates = templates;
-%   modelParameters.distributions = angle_distributions;
-%   modelParameters.templates1 = templates1;
-  modelParameters.templates2 = templates2;
-%   modelParameters.templates3 = templates3;
-  modelParameters.templates4 = templates4;
-%   modelParameters.templates5 = templates5;
-  modelParameters.templates6 = templates6;
+
+    trials = zeros(size(training_data,1), 8, 98, 571);
+    pos = zeros(size(training_data,1), 8, 2, 571);
+    final_pos = zeros(size(training_data,1), 8, 2, 100);
+    for trial_n = 1:size(training_data,1)
+        for angle_n = 1: size(training_data,2)
+            trials(trial_n, angle_n, :, :) = training_data(trial_n, angle_n).spikes(:, 1:571);
+            pos(trial_n, angle_n, :, :) = training_data(trial_n, angle_n).handPos(1:2, 1:571);
+            final_pos(trial_n,angle_n,:,:) = training_data(trial_n, angle_n).handPos(1:2, end-99:end);
+        end
+    end
+    start = squeeze(mean(pos(:,:,:,1),1))';
+    
+    [n_tr, n_a, n_n, ~] = size(trials);
+    n_bin = 300/100;
+    trial = trials(:,:,:,1:300);
+
+    templates2 = movsum(trial, 100, 4, 'Endpoints','discard');
+    templates2 = reshape( ...
+                templates2(:,:,:,1:100:end) ...
+                , n_tr, n_a, n_n*n_bin);
+
+    templates2 = cat(3, mean(trial, 4), templates2);
+    templates2 = cat(3, ...
+                templates2(:,:,1:n_n) ./ ...
+                repmat(sum(templates2(:,:,1:n_n),3) ...
+                , 1,1,n_n)...
+                , templates2);
+
+    templates2 = squeeze(mean(templates2, 1));
+    
+    n_bin = 400/100;
+    trial = trials(:,:,:,1:400);
+
+    templates4 = movsum(trial, 100, 4, 'Endpoints','discard');
+    templates4 = reshape( ...
+                templates4(:,:,:,1:100:end) ...
+                , n_tr, n_a, n_n*n_bin);
+
+    templates4 = cat(3, mean(trial, 4), templates4);
+    templates4 = cat(3, ...
+                templates4(:,:,1:n_n) ./ ...
+                repmat(sum(templates4(:,:,1:n_n),3) ...
+                , 1,1,n_n)...
+                , templates4);
+
+    templates4 = squeeze(mean(templates4, 1));
+    
+    n_bin = 500/125;
+    trial = trials(:,:,:,1:500);
+
+    templates6 = movsum(trial, 125, 4, 'Endpoints','discard');
+    templates6 = reshape( ...
+                templates6(:,:,:,1:125:end) ...
+                , n_tr, n_a, n_n*n_bin);
+
+    templates6 = cat(3, mean(trial, 4), templates6);
+    templates6 = cat(3, ...
+                templates6(:,:,1:n_n) ./ ...
+                repmat(sum(templates6(:,:,1:n_n),3) ...
+                , 1,1,n_n)...
+                , templates6);
+
+    templates6 = squeeze(mean(templates6, 1));
+    
+    time_points = 320 : 20 : 571;
+    avgT = zeros(n_a, 2, length(time_points));
+    stdT = zeros(n_a, 2, length(time_points));
+
+    avgT = squeeze(mean(pos(:,:,:,time_points), 1));
+    stdT = squeeze(std(pos(:,:,:,time_points), 1));
+    
+    obj = zeros(2, n_a);
+    obj = squeeze(mean(mean(...
+          final_pos, 4), 1))';
+
+    modelParameters.initial = start;
+    modelParameters.traces = avgT;
+    modelParameters.deviation = stdT;
+    modelParameters.objectives = obj;
+    modelParameters.templates2 = templates2;
+    modelParameters.templates4 = templates4;
+    modelParameters.templates6 = templates6;
   
 end
