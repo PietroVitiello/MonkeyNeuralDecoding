@@ -71,6 +71,11 @@ clean_trial = process.clean_dataset(trial, []);
 correct_angles = estimated_angles == true_angles;
 accuracy = sum(correct_angles)/length(true_angles)*100
 
+%% Get angle groups
+[pref_mag2, pref_neuron2] = process.preferredAngle(trials, 1, 300);
+trials = process.groupedNeurons(trial);
+size(trials)
+
 
 
 

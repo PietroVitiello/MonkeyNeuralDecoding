@@ -337,6 +337,76 @@ classdef Processing
             end
         end
         
+        % The neurons sorted by highest relative activity per angle, based
+        % only on the preferred angle
+        function [pref_mag, pref_neuron] = preferredAngle(~, trial, start, stop)
+            n_a = size(trial, 2);
+            n_n = size(trial, 3);
+            
+            avg_activity = squeeze(mean(mean( ...
+                           trial(:, :, :, start:stop) ...
+                           , 4), 1))';
+            
+            sum_activity = sum(avg_activity, 2);
+            
+            distribution = avg_activity ./ ...
+                           repmat(sum_activity, 1, n_a);
+            [mag, pref_angle] = max(distribution, [], 2);
+            
+            pref_mag = zeros(n_n, 8);
+            pref_neuron = zeros(n_n, 8);
+            for i = 1:n_a
+                vector = find(pref_angle == i);
+                pref_mag(1:length(vector),i) = mag(vector);
+                pref_neuron(1:length(vector),i) = vector;
+            end
+            
+        end
+        
+        
+        function trial_mx = groupedNeurons(~, trial)
+            [n_tr, n_a] = size(trial);
+            trial_mx = zeros(n_tr, n_a, n_a, 571);
+            
+            groups = {[9;13;18;43;54;64;85;88], ...
+                     [1;3;4;14;30;34;35;45;74;84], ...
+                     [41;78;97], ...
+                     [6;10;11;12;36;38;39;40;44;60;66;68;72], ...
+                     [8;21;22;23;28;32;46;50;70;98], ...
+                     [2;15;24;25;29;31;33;52;53;59;65;67;69;73;75;83;86;89;93;94;95], ...
+                     [16;17;26;27;42;47;51;55;56;57;58;61;62;77;79;80;82;90;91;92;96], ...
+                     [5;7;19;20;37;48;49;63;71;76;81;87]};
+            
+            for tr = 1:n_tr
+                for a = 1:n_a
+                    for g = 1:n_a
+                        trial_mx(tr,a,g,:) = sum(trial(tr,a).spikes(groups{1,g},1:571));
+                    end
+                end
+            end
+            
+        end
+        
+        
+        function new_spikes = applyGrouping(~, spikes)
+            new_spikes = zeros(8, size(spikes, 2));
+            
+            groups = {[9;13;18;43;54;64;85;88], ...
+                     [1;3;4;14;30;34;35;45;74;84], ...
+                     [41;78;97], ...
+                     [6;10;11;12;36;38;39;40;44;60;66;68;72], ...
+                     [8;21;22;23;28;32;46;50;70;98], ...
+                     [2;15;24;25;29;31;33;52;53;59;65;67;69;73;75;83;86;89;93;94;95], ...
+                     [16;17;26;27;42;47;51;55;56;57;58;61;62;77;79;80;82;90;91;92;96], ...
+                     [5;7;19;20;37;48;49;63;71;76;81;87]};
+                 
+            for a = 1:8
+                new_spikes(a,:) = sum(spikes(groups{1,a},:));
+            end
+            
+        end
+        
+        
         
     end
     
