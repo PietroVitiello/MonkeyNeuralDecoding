@@ -12,7 +12,7 @@ function [modelParameters] = positionEstimatorTraining_10(training_data)
   
   [trials, ~] = processor.get_data_matrix(training_data);
 %   trials = processor.groupedNeurons(training_data);
-  templates1 = a_classifier.firingTemplate_2n3Dv2(trials, 300, 1, 150);
+  templates1 = a_classifier.firingTemplate_2n3D(trials, 300, 1, 150);
 %   templates2 = a_classifier.firingTemplate_2n3D(trials, 400, 1, 100);
   
   modelParameters.templates1 = templates1;
