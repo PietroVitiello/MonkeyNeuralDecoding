@@ -48,6 +48,13 @@ classdef AngleClassifier
             end
         end
         
+        function Mdl = knn_classifier_(~, k, varargin)
+            train_samples = varargin{1};
+            train_labels = varargin{2};
+            Mdl = fitcknn(train_samples,train_labels,'NumNeighbors',k);
+        end
+        
+        
         
         function [estimated_angles, true_angles] = likelihood(~, train_matrix, test_matrix)
             
@@ -98,7 +105,7 @@ classdef AngleClassifier
             train_data = sum(train_matrix, 4);
             train_data = processor.switchDim(train_data);
             
-            mu_ = mean(train_data, 1);
+            mu_ = squeeze(mean(train_data, 1));
             size(mu_);
 
             sigma_inv_ = zeros(d, d, n_angles);
@@ -106,6 +113,7 @@ classdef AngleClassifier
             for angle = 1:n_angles
                 sigma = cov(train_data(:,:,angle));
                 %add error message if not invertible?
+                eig(sigma);
                 sigma_inv_(:,:,angle) = inv(sigma);
                 
                 scalar_(angle) = 1/sqrt(((2*pi)^d)*det(sigma));
@@ -127,7 +135,7 @@ classdef AngleClassifier
                     x = test_data(i, :);
 %                     x = mu_(1,:,a);
                     
-                    mu = mu_(1,:,a);
+                    mu = mu_(:,a)';
                     sigma_inv = sigma_inv_(:,:,a);
                     scalar = scalar_(a);
                     
@@ -142,6 +150,76 @@ classdef AngleClassifier
         end
         
         
+        
+        function [estimated_angles, true_angles] = multidimensional_mlev2(~, train_matrix, test_matrix, bin_size)
+            
+            [tr_train, n_angles, d, ~] = size(train_matrix);
+            
+%             ind = reshape(repmat(...
+%                   [1:d/bin_size]', 1, bin_size)' ...
+%                   , d, 1);
+%               
+%             permute(repmat(ind, 1, n_angles, tr_train), [3 2 1]);
+            
+            %%% FITTING %%%
+            
+            train_data = sum(train_matrix, 4);
+            train_data = movsum(train_data, bin_size, 3, 'Endpoints','discard');
+            train_data = train_data(:,:,1:bin_size:end);
+            
+            train_data = permute(train_data, [1 3 2]);
+            
+            mu_ = squeeze(mean(train_data, 1));
+            size(mu_);
+
+            sigma_inv_ = zeros(d/bin_size, d/bin_size, n_angles);
+            scalar_ = zeros(n_angles, 1);
+            for angle = 1:n_angles
+                sigma = cov(train_data(:,:,angle));
+                %add error message if not invertible?
+                eig(sigma);
+                sigma_inv_(:,:,angle) = inv(sigma);
+                
+                scalar_(angle) = 1/sqrt(((2*pi)^d)*det(sigma));
+            end
+            
+            %%% TESTING %%%
+            tr_test = size(test_matrix, 1);
+            n_test_trials = tr_test*n_angles;
+            
+            test_data = sum(test_matrix, 4);
+            test_data = movsum(test_data, bin_size, 3, 'Endpoints','discard');
+            test_data = test_data(:,:,1:bin_size:end);
+            
+            test_data = reshape(test_data, [n_test_trials, d/bin_size]);
+            
+            likelihood = zeros(n_angles, 1);
+            estimated_angles = zeros(n_test_trials, 1);
+            true_angles = zeros(n_test_trials, 1);
+            
+            for i = 1:n_test_trials
+                for a = 1:n_angles
+                    
+                    x = test_data(i, :);
+%                     x = mu_(1,:,a);
+                    
+                    mu = mu_(:,a)';
+                    sigma_inv = sigma_inv_(:,:,a);
+                    scalar = scalar_(a);
+                    
+                    e = exp((-1/2)*dot((x-mu)*sigma_inv, (x-mu)'));
+                    
+                    likelihood(a) = scalar * e;
+                    
+                end
+                [~, estimated_angles(i)] = max(likelihood);
+                true_angles(i) = floor((i-1) / size(test_matrix, 1)) + 1;
+            end
+        end
+        
+        
+        
+        
         function templates = firingTemplate(~, trial, stop, start)
             
             n_a = size(trial, 2);
@@ -154,6 +232,35 @@ classdef AngleClassifier
                     
         end
         
+        
+        function templates = firingTemplate2(~, trial, stop, start, last_scale)
+            
+            n_a = size(trial, 2);
+            n_n = size(trial, 3);
+            scaling = [last_scale : (1-last_scale)/(stop-start) : 1]';
+            
+            trial2 = zeros(size(trial, 1), n_a, n_n);
+            templates = zeros(n_a, n_n, 1);
+            
+            for tr = 1:size(trial, 1)
+                for a = 1:n_a
+                    for n = 1:n_n
+                        trial(tr,a,n,start:stop);
+                        trial2(tr,a,n) = sum(squeeze(trial(tr,a,n,start:stop)) .* scaling);
+                    end
+                end
+            end
+            
+            templates = squeeze(mean(trial2, 1));
+            
+%             templates = squeeze(mean(sum(...
+%                         trial(:,:,:,start:stop) .*...
+%                         repmat(scaling, 98, )...
+%                         , 4), 1));
+                    
+        end
+        
+        
         function angle = findSimilarAngle(~, templates, spikes, stop, start)
             
             B = mean(spikes(:, start:stop), 2)';
@@ -163,12 +270,24 @@ classdef AngleClassifier
         end
         
         % Worse, don't use
-        function angle = findSimilarAngle2(~, templates, spikes, stop, start)
+        function angle = findSimilarAngle1_2(~, templates, spikes, stop, start)
             
             B = mean(spikes(:, start:stop), 2)';
             [~, angle] = min(prod((abs(templates - ...
                          repmat(B, 8, 1) ...
                          )+1).*10, 2));
+        end
+        
+        function angle = findSimilarAngle2(~, templates, spikes, stop, start, last_scale)
+            
+            scaling = last_scale : (1-last_scale)/(stop-start) : 1;
+            B = sum( ...
+                spikes(:,start:stop) .* repmat(scaling, size(spikes, 1), 1) ...
+                , 2)';
+            
+            [~, angle] = min(sum(abs(templates - ...
+                         repmat(B, 8, 1))...
+                         , 2));
         end
         
 
@@ -344,6 +463,187 @@ classdef AngleClassifier
             [~, angle] = max(likelihood);
             
         end
+        
+        
+        function [vector, angle] = visualizeSimilarityVectors(~, templates, spikes, stop, start)
+            
+            B = mean(spikes(:, start:stop), 2)';
+            vector = sum(abs(templates - ...
+                      repmat(B, 8, 1))...
+                      , 2);
+            [~, angle] = min(vector);
+        end
+        
+        
+        function angle = SimilarityMLE(~, templates, par, spikes, stop, start)
+            n_n = size(par, 1);
+            n_a = size(par, 2);
+            
+            avg_activity = mean( ...
+                           spikes(:, start:stop) ...
+                           , 2);
+            
+            sum_activity = sum(avg_activity);
+            
+            distribution = avg_activity / sum_activity;
+            
+            like_a = zeros(n_n, n_a);
+            for n = 1:n_n
+                for a = 1:n_a
+                    like_a(n, a) = normpdf(distribution(n), par(n,a,1), par(n,a,2)) / 100;
+%                     if like_a(n, a) < 1
+%                         like_a(n, a) = 1;
+%                     end
+                end
+            end
+            silent_n = [8, 24, 25, 38, 42, 49, 52, 54, 73, 74, 76];
+            like_a(silent_n,:) = [];
+            like_a(isnan(like_a)) = 1;
+            likelihood = prod(like_a);
+            likelihood(1);
+            
+            vector = sum(abs(templates - ...
+                      repmat(avg_activity', 8, 1))...
+                      , 2);
+            vector = (vector / sum(vector));
+%             vector = 1 - vector
+            
+            [~, angle] = max(likelihood - vector');
+            
+            
+        end
+        
+        function angle = compareAverage(~, training_average, test_trial, neurons)
+            MSE_vector = zeros(1, 8);
+            for i = 1:size(MSE_vector, 2)
+                MSE_vector(1, i) = immse(training_average(:, :, i), test_trial(neurons, :));
+            end
+            [~, angle] = min(MSE_vector);
+            MSE_vector;
+        end
+        
+        function templates = firingTemplate_3D(~, trial, stop, start, bin_size)
+            trial = trial(:,:,:,start:stop);
+            templates = movsum(trial, bin_size, 4, 'Endpoints','discard');
+            templates = templates(:,:,:,1:bin_size:end);
+            
+            templates = squeeze(mean(templates, 1));
+                    
+        end
+        
+        
+        function angle = findSimilarAngle_3D(~, templates, spikes, stop, start, bin_size)
+            spikes = spikes(:,start:stop);
+            B = movsum(spikes, bin_size, 2, 'Endpoints','discard');
+            B = B(:,1:bin_size:end);
+            
+            angle_dissim = sum(abs(templates - ...
+                           permute(repmat(B, 1, 1, 8),[3 1 2]) ...
+                           ),2);
+            bin_sum = sum(angle_dissim, 1);
+            angle_dissim = angle_dissim ./ repmat(bin_sum,8,1);
+            [~, angle] = min(sum(angle_dissim, 3));
+            
+        end
+        
+        
+        function templates = firingTemplate_2n3D(~, trial, stop, start, bin_size)
+            [n_tr, n_a, n_n, ~] = size(trial);
+            n_bin = (stop-start+1)/bin_size;
+            trial = trial(:,:,:,start:stop);
+            
+            templates = movsum(trial, bin_size, 4, 'Endpoints','discard');
+            templates = reshape( ...
+                        templates(:,:,:,1:bin_size:end) ...
+                        , n_tr, n_a, n_n*n_bin);
+            
+            templates = cat(3, mean(trial, 4), templates);
+            templates = cat(3, ...
+                        templates(:,:,1:n_n) ./ ...
+                        repmat(sum(templates(:,:,1:n_n),3) ...
+                        , 1,1,n_n)...
+                        , templates);
+%             templates(:,:,n_n+1:end) = templates(:,:,n_n+1:end) ./ ...
+%                                        repmat(templates(:,:,1:n_n), 1,1,n_bin);
+            
+            assignin('base', 'ww', repmat(templates(:,:,1:n_n), 1,1,n_bin))
+                                   
+            templates = squeeze(mean(templates, 1));
+%             templates(isnan(templates)) = 0;
+            size(templates);
+            
+            assignin('base', 'qq', templates')
+                    
+        end
+        
+        
+        function angle = findSimilarAngle_2n3D(~, templates, spikes, stop, start, bin_size)
+            n_n = size(spikes, 1);
+            n_bin = (stop-start+1)/bin_size;
+            spikes = spikes(:,start:stop);
+            
+            B = movsum(spikes, bin_size, 2, 'Endpoints','discard');
+            B = reshape(B(:,1:bin_size:end), n_n*n_bin, 1);
+            B = [mean(spikes, 2) ; B];
+            B = [B(1:n_n) ./ repmat(sum( ...
+                B(1:n_n)), n_n, 1); B];
+%             size(B)
+%             size(repmat(B(1:n_n), n_bin, 1))
+%             B(n_n+1:end) = B(n_n+1:end) ./ repmat(B(1:n_n), n_bin, 1);
+%             B(isnan(B)) = 0;
+            
+            [~, angle] = min(sum(abs(templates - ...
+                         repmat(B, 1, 8)' ...
+                         ), 2));
+            
+        end
+        
+        
+        function templates = firingTemplate_2n3Dv1_2(~, trial, stop, start, bin_size)
+            [~, n_a, n_n, ~] = size(trial);
+            n_bin = (stop-start+1)/bin_size;
+            trial = trial(:,:,:,start:stop);
+            
+            trial = squeeze(mean(trial, 1));
+            
+            templates = movsum(trial, bin_size, 3, 'Endpoints','discard');
+            templates = reshape( ...
+                        templates(:,:,1:bin_size:end) ...
+                        , n_a, n_n*n_bin);
+            
+            templates = cat(2, mean(trial, 3), templates);
+            templates = cat(2, ...
+                        templates(:,1:n_n) ./ ...
+                        repmat(sum(templates(:,1:n_n),2) ...
+                        , 1,n_n)...
+                        , templates);
+                    
+        end
+        
+        
+        function templates = firingTemplate_2n3D_knn(~, trial, stop, start, bin_size)
+            [n_tr, n_a, n_n, ~] = size(trial);
+            n_bin = (stop-start+1)/bin_size;
+            trial = trial(:,:,:,start:stop);
+            
+            templates = movsum(trial, bin_size, 4, 'Endpoints','discard');
+            templates = reshape( ...
+                        templates(:,:,:,1:bin_size:end) ...
+                        , n_tr, n_a, n_n*n_bin);
+            
+            templates = cat(3, mean(trial, 4), templates);
+            templates = cat(3, ...
+                        templates(:,:,1:n_n) ./ ...
+                        repmat(sum(templates(:,:,1:n_n),3) ...
+                        , 1,1,n_n)...
+                        , templates);
+                                   
+            templates = reshape(templates, n_tr*8, []);
+            size(templates)
+                    
+        end
+        
+        
         
     end
     

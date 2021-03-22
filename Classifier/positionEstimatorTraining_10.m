@@ -1,4 +1,4 @@
-function [modelParameters] = positionEstimatorTraining_2(training_data)
+function [modelParameters] = positionEstimatorTraining_10(training_data)
   % Arguments:
  
   % - training_data:
@@ -11,12 +11,13 @@ function [modelParameters] = positionEstimatorTraining_2(training_data)
   a_classifier = AngleClassifier();
   
   [trials, ~] = processor.get_data_matrix(training_data);
-  templates1 = a_classifier.firingTemplate2(trials, 300, 1, 0.2);
-%   templates1 = a_classifier.firingTemplate(trials, 300, 1);
-%   templates2 = a_classifier.firingTemplate(trials, 400, 1);
+%   trials = processor.groupedNeurons(training_data);
+  templates1 = a_classifier.firingTemplate_2n3D(trials, 300, 1, 150);
+%   templates2 = a_classifier.firingTemplate_2n3D(trials, 400, 1, 100);
   
   modelParameters.templates1 = templates1;
 %   modelParameters.templates2 = templates2;
   modelParameters.classifier = a_classifier;
+%   modelParameters.processor = processor;
   
 end

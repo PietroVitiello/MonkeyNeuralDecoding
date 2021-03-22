@@ -4,14 +4,15 @@
 % the relevant modelParameters, and then calls the function
 % "positionEstimator" to decode the trajectory. 
 
-function n_different_tests = testFunction_for_Classifier_2(teamName)
+function n_different_tests = testFunction_for_Classifier_6(teamName)
 
 load monkeydata0.mat
 
-n_different_tests = 10;
+n_different_tests = 50;
 correct_first = 0;
 correct_final = 0;
-
+count_guess_error = zeros(1, 8);
+count_correct_error = zeros(1, 8);
 for test = 1:n_different_tests
     % Set random number generator
     %rng(2013);
@@ -26,7 +27,7 @@ for test = 1:n_different_tests
     n_predictions = size(testData,1)*8;
 
     % Train Model
-    modelParameters = positionEstimatorTraining_2(trainingData);
+    modelParameters = positionEstimatorTraining_6(trainingData);
 
     for tr=1:size(testData,1)
         display(['Decoding block ',num2str(tr),' out of ',num2str(size(testData,1))]);
@@ -38,14 +39,13 @@ for test = 1:n_different_tests
             for t=times
                 past_current_trial.trialId = testData(tr,direc).trialId;
                 past_current_trial.spikes = testData(tr,direc).spikes(:,1:t);
-
                 past_current_trial.startHandPos = testData(tr,direc).handPos(1:2,1); 
 
                 if nargout('positionEstimator') == 2
-                    [angle, newParameters] = positionEstimator_2(past_current_trial, modelParameters);
+                    [angle, newParameters] = positionEstimator_6(past_current_trial, modelParameters);
                     modelParameters = newParameters;
                 elseif nargout('positionEstimator') == 1
-                    [angle] = positionEstimator_2(past_current_trial, modelParameters);
+                    [angle] = positionEstimator_6(past_current_trial, modelParameters);
                 end
 
                 if t == 320
@@ -53,10 +53,23 @@ for test = 1:n_different_tests
                 elseif t == times(end)
                     correct_final = correct_final + (angle == direc);
                 end
+                if angle ~= direc && t == 320
+                    %disp('£££££££££££££££££££')
+                    for i = 1:8
+                        if angle == i
+                            count_guess_error(1, i) = count_guess_error(1, i) + 1;
+                        end
+                        if direc == i 
+                            count_correct_error(1, i) = count_correct_error(1, i) + 1;
+                        end
+                    end
+                end
             end
         end
     end
 end
+count_guess_error
+count_correct_error
 
 fprintf('\n\nCorrect predictions at the beginning: %.3f out of %d', correct_first/n_different_tests, n_predictions);
 

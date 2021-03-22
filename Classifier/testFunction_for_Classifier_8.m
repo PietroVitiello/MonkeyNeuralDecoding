@@ -4,11 +4,11 @@
 % the relevant modelParameters, and then calls the function
 % "positionEstimator" to decode the trajectory. 
 
-function n_different_tests = testFunction_for_Classifier_2(teamName)
+function n_different_tests = testFunction_for_Classifier_8(teamName)
 
 load monkeydata0.mat
 
-n_different_tests = 10;
+n_different_tests = 1;
 correct_first = 0;
 correct_final = 0;
 
@@ -26,7 +26,7 @@ for test = 1:n_different_tests
     n_predictions = size(testData,1)*8;
 
     % Train Model
-    modelParameters = positionEstimatorTraining_2(trainingData);
+    modelParameters = positionEstimatorTraining_8(trainingData);
 
     for tr=1:size(testData,1)
         display(['Decoding block ',num2str(tr),' out of ',num2str(size(testData,1))]);
@@ -42,10 +42,10 @@ for test = 1:n_different_tests
                 past_current_trial.startHandPos = testData(tr,direc).handPos(1:2,1); 
 
                 if nargout('positionEstimator') == 2
-                    [angle, newParameters] = positionEstimator_2(past_current_trial, modelParameters);
+                    [angle, newParameters] = positionEstimator_8(past_current_trial, modelParameters, direc);
                     modelParameters = newParameters;
                 elseif nargout('positionEstimator') == 1
-                    [angle] = positionEstimator_2(past_current_trial, modelParameters);
+                    [angle] = positionEstimator_8(past_current_trial, modelParameters, direc);
                 end
 
                 if t == 320
