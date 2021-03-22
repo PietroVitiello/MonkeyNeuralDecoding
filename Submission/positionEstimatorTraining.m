@@ -1,4 +1,4 @@
-function [modelParameters] = positionEstimatorTraining_4(training_data)
+function [modelParameters] = positionEstimatorTraining(training_data)
   % Arguments:
  
   % - training_data:
