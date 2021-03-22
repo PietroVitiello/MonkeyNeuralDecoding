@@ -1,31 +1,36 @@
 function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
-
+  % Return Value:
+  % - [x, y]:
+  %     current position of the hand
+  
+  classifier = modelParameters.classifier;
   
   len = size(test_data.spikes,2);
   time_point = (len-300)/20;
   noise = zeros(2, 1);
   scale = zeros(2, 1);
+  angle = zeros(1, 1);
   
   if time_point == 1
-     
-     templates = modelParameters.templates2;
-     spikes = test_data.spikes;
-     
-     n_n = size(spikes, 1);
-     n_bin = 300/100;
-     spikes = spikes(:,1:300);
-
-     B = movsum(spikes, 100, 2, 'Endpoints','discard');
-     B = reshape(B(:,1:100:end), n_n*n_bin, 1);
-     B = [mean(spikes, 2) ; B];
-     B = [B(1:n_n) ./ repmat(sum( ...
-        B(1:n_n)), n_n, 1); B];
-
-     [~, angle] = min(sum(abs(templates - ...
-                 repmat(B, 1, 8)' ...
-                 ), 2));
+%       angle(1, 1) = classifier.similarityDistributions(...
+%               modelParameters.templates, modelParameters.distributions ...
+%               , test_data.spikes, 1, 300);
+      
+      %init_spikes = sum(test_data.spikes(1:98, 1:len), 2);
+      %angle(1, 1) = predict(modelParameters.classifier1, init_spikes');
+      
+      %angle(2, 1) = classifier.findSimilarAngle2(modelParameters.templates, test_data.spikes, 300, 1);
+      
+%       angle(2, 1) = classifier.findSimilarAngle_3D(modelParameters.templates1, test_data.spikes, 300, 1, 150);
+      
+      angle(1, 1) = classifier.findSimilarAngle_2n3D(modelParameters.templates2, test_data.spikes, 300, 1, 100);
       
       modelParameters.angle_n = mode(angle);
+      
+%       if (angle(1, 1) ~= angle(2, 1)) || (angle(1, 1) ~= angle(3, 1)) || (angle(2, 1) ~= angle(3, 1))
+%           modelParameters.angle_n = angle(1, 1);
+%           disp('################################"')
+%       end
       
       if test_data.startHandPos(1, 1) < modelParameters.initial(1, modelParameters.angle_n)
           noise(1, 1) = -1;
@@ -53,44 +58,20 @@ function [x, y, modelParameters] = positionEstimator(test_data, modelParameters)
   end
   
   if time_point <= size(modelParameters.traces, 3)
+%       if time_point == 3
+%           angle(1, 1) = classifier.findSimilarAngle_2n3D(modelParameters.templates3, test_data.spikes, len, 1, 120);
+%           modelParameters.angle_n = mode(angle);
+%       end
       if time_point == 5
-          
-          templates = modelParameters.templates4;
-          spikes = test_data.spikes;
-
-          n_n = size(spikes, 1);
-          n_bin = 400/100;
-          spikes = spikes(:,1:400);
-
-          B = movsum(spikes, 100, 2, 'Endpoints','discard');
-          B = reshape(B(:,1:100:end), n_n*n_bin, 1);
-          B = [mean(spikes, 2) ; B];
-          B = [B(1:n_n) ./ repmat(sum( ...
-              B(1:n_n)), n_n, 1); B];
-
-          [~, angle] = min(sum(abs(templates - ...
-                       repmat(B, 1, 8)' ...
-                       ), 2));
+          angle(1, 1) = classifier.findSimilarAngle_2n3D(modelParameters.templates4, test_data.spikes, len, 1, 100);
           modelParameters.angle_n = mode(angle);
       end
+%       if time_point == 7
+%           angle(1, 1) = classifier.findSimilarAngle_2n3D(modelParameters.templates5, test_data.spikes, len, 1, 110);
+%           modelParameters.angle_n = mode(angle);
+%       end
       if time_point == 10
-          
-          templates = modelParameters.templates6;
-          spikes = test_data.spikes;
-
-          n_n = size(spikes, 1);
-          n_bin = 500/125;
-          spikes = spikes(:,1:500);
-
-          B = movsum(spikes, 125, 2, 'Endpoints','discard');
-          B = reshape(B(:,1:125:end), n_n*n_bin, 1);
-          B = [mean(spikes, 2) ; B];
-          B = [B(1:n_n) ./ repmat(sum( ...
-              B(1:n_n)), n_n, 1); B];
-
-          [~, angle] = min(sum(abs(templates - ...
-                       repmat(B, 1, 8)' ...
-                       ), 2));
+          angle(1, 1) = classifier.findSimilarAngle_2n3D(modelParameters.templates6, test_data.spikes, len, 1, 125);
           modelParameters.angle_n = mode(angle);
       end
       
