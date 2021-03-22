@@ -599,6 +599,31 @@ classdef AngleClassifier
         end
         
         
+        function templates = firingTemplate_2n3Dv1_2(~, trial, stop, start, bin_size)
+            [~, n_a, n_n, ~] = size(trial);
+            n_bin = (stop-start+1)/bin_size;
+            trial = trial(:,:,:,start:stop);
+            
+            trial = squeeze(mean(trial, 1));
+            
+            templates = movsum(trial, bin_size, 3, 'Endpoints','discard');
+            templates = reshape( ...
+                        templates(:,:,1:bin_size:end) ...
+                        , n_a, n_n*n_bin);
+            
+            templates = cat(2, mean(trial, 3), templates);
+            templates = cat(2, ...
+                        templates(:,1:n_n) ./ ...
+                        repmat(sum(templates(:,1:n_n),2) ...
+                        , 1,n_n)...
+                        , templates);
+                    
+        end
+        
+        
+        
+        
+        
         
     end
     
