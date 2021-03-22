@@ -1,4 +1,4 @@
-function [x, y, modelParameters] = positionEstimator_4(test_data, modelParameters, scale_value)
+function [x, y, modelParameters] = positionEstimator_4(test_data, modelParameters)
   % Return Value:
   % - [x, y]:
   %     current position of the hand
@@ -75,8 +75,8 @@ function [x, y, modelParameters] = positionEstimator_4(test_data, modelParameter
           modelParameters.angle_n = mode(angle);
       end
       
-      x = modelParameters.traces(modelParameters.angle_n, 1, time_point) + modelParameters.noise(1, 1)*modelParameters.deviation(modelParameters.angle_n, 1, time_point)*modelParameters.scale(1, 1)/scale_value;
-      y = modelParameters.traces(modelParameters.angle_n, 2, time_point) + modelParameters.noise(2, 1)*modelParameters.deviation(modelParameters.angle_n, 2, time_point)*modelParameters.scale(2, 1)/scale_value;
+      x = modelParameters.traces(modelParameters.angle_n, 1, time_point) + modelParameters.noise(1, 1)*modelParameters.deviation(modelParameters.angle_n, 1, time_point)*modelParameters.scale(1, 1)/9;
+      y = modelParameters.traces(modelParameters.angle_n, 2, time_point) + modelParameters.noise(2, 1)*modelParameters.deviation(modelParameters.angle_n, 2, time_point)*modelParameters.scale(2, 1)/9;
   else
       x = modelParameters.objectives(1, modelParameters.angle_n);
       y = modelParameters.objectives(2, modelParameters.angle_n);

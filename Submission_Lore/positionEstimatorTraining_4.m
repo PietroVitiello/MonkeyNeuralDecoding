@@ -31,19 +31,21 @@ function [modelParameters] = positionEstimatorTraining_4(training_data)
 %   templates = a_classifier.firingTemplate(trials, 300, 1);
 %   angle_distributions = processor.firingDistribution(trials, 1, 320);
 %   
-%   [samples, labels] = processor.create_dataset(training_data, 1:98, 320, 1);
-%   [samples2, labels2] = processor.create_dataset(training_data, 1:98, 360, 1);
-%   [samples3, labels3] = processor.create_dataset(training_data, 1:98, 400, 1);
-%   n_neighbours = 28;
-%   [Mdl1, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);  
-%   [Mdl2, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples2, labels2);
-%   [Mdl3, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples3, labels3);
+
   
   templates2 = a_classifier.firingTemplate_2n3D(trials, 300, 1, 100);
 %   templates3 = a_classifier.firingTemplate_2n3D(trials, 360, 1, 120);
   templates4 = a_classifier.firingTemplate_2n3D(trials, 400, 1, 100);
 %   templates5 = a_classifier.firingTemplate_2n3D(trials, 440, 1, 110);
   templates6 = a_classifier.firingTemplate_2n3D(trials, 500, 1, 125);
+  
+  [samples, labels] = processor.create_dataset(training_data, 1:98, 320, 1);
+  [samples2, labels2] = processor.create_dataset(training_data, 1:98, 360, 1);
+  [samples3, labels3] = processor.create_dataset(training_data, 1:98, 400, 1);
+  n_neighbours = 28;
+  [Mdl1, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples, labels);  
+  [Mdl2, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples2, labels2);
+  [Mdl3, ~, ~] = a_classifier.knn_classifier(n_neighbours, samples3, labels3);
   
   start = trj.initial_positions(initial_pos);
   [avgT, stdT] = trj.averageTrajectory(pos);

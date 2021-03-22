@@ -281,6 +281,8 @@ classdef AngleClassifier
                     
         end
         
+        
+        
         function angle = findSimilarAngle_2n3D(~, templates, spikes, stop, start, bin_size)
             n_n = size(spikes, 1);
             n_bin = (stop-start+1)/bin_size;
@@ -301,6 +303,30 @@ classdef AngleClassifier
                          ), 2));
             
         end
+        
+        
+        function templates = firingTemplate_2n3Dv2(~, trial, stop, start, bin_size)
+            [n_tr, n_a, n_n, ~] = size(trial);
+            n_bin = (stop-start+1)/bin_size;
+            trial = trial(:,:,:,start:stop);
+            
+            templates = movsum(trial, bin_size, 4, 'Endpoints','discard');
+            templates = reshape( ...
+                        templates(:,:,:,1:bin_size:end) ...
+                        , n_tr, n_a, n_n*n_bin);
+            
+            templates = cat(3, mean(trial, 4), templates);
+            templates = cat(3, ...
+                        templates(:,:,1:n_n) ./ ...
+                        repmat(sum(templates(:,:,1:n_n),3) ...
+                        , 1,1,n_n)...
+                        , templates);
+                                   
+            templates = reshape(templates, n_tr*8, []);
+                    
+        end
+        
+        
         
     end
     
