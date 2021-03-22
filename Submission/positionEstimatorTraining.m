@@ -1,5 +1,4 @@
 function [modelParameters] = positionEstimatorTraining(training_data)
-<<<<<<< HEAD
   % Arguments:
  
   % - training_data:

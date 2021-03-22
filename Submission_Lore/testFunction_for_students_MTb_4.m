@@ -4,79 +4,95 @@
 % the relevant modelParameters, and then calls the function
 % "positionEstimator" to decode the trajectory. 
 
-function [average_RMSE, n_different_tests] = testFunction_for_students_MTb_4(teamName)
+function [average_RMSE, n_different_tests, ix_array] = testFunction_for_students_MTb_4(teamName)
 
 load monkeydata0.mat
 
-n_different_tests = 50;
+n_different_tests = 20;
 RMSE_runs = zeros(1, n_different_tests);
 
-for test = 1:n_different_tests
-    % Set random number generator
-    %rng(2013);
-    ix = randperm(length(trial));
-    % addpath(teamName);
+ix_array = [73,1,18,24,92,33,48,54,37,89,68,23,84,13,15,94,20,7,22,44,75,63,16,31,28,97,8,66,64,50,76,3,67,4,51,82,72,55,49,90,87,99,74,27,56,86,57,35,32,96,34,71,60,19,98,12,91,14,61,69,70,58,36,83,100,5,40,80,6,62,21,77,85,41,52,2,93,29,42,11,25,47,88,30,53,10,78,79,65,59,81,43,9,26,17,45,38,95,39,46;41,1,36,68,65,38,29,12,24,80,20,72,87,57,55,18,26,51,14,10,64,19,70,2,69,85,52,56,63,39,21,74,7,61,44,78,11,17,75,77,15,6,9,93,5,45,25,58,60,13,99,50,96,71,83,32,28,22,30,59,62,43,34,88,90,35,89,46,97,67,49,100,66,37,98,54,4,92,16,81,84,82,8,94,91,40,31,76,95,3,86,73,79,42,27,33,53,47,23,48;99,52,57,76,89,27,55,9,45,94,85,83,58,48,4,40,96,65,74,87,38,79,39,78,90,51,97,21,69,14,41,1,23,75,88,73,26,59,15,68,20,28,91,82,7,50,84,98,34,60,47,16,6,19,29,2,3,49,30,17,66,10,37,33,93,44,92,31,72,35,71,95,24,11,12,8,61,53,77,18,63,36,80,56,25,62,100,67,13,22,54,64,86,5,46,43,32,42,81,70;80,58,33,89,30,40,42,37,86,38,72,100,50,59,31,2,85,4,56,61,71,46,32,76,52,21,54,67,14,99,45,63,55,90,53,24,20,87,35,79,94,64,25,19,26,62,73,6,41,8,91,95,9,84,43,29,5,16,60,44,18,11,92,88,47,34,51,7,66,1,3,93,15,12,74,23,75,49,96,98,36,83,78,77,82,13,48,39,69,65,27,97,68,81,22,70,28,10,57,17;57,48,61,59,1,65,31,47,67,11,77,58,63,12,73,20,3,79,87,72,37,56,18,94,84,96,19,27,74,39,44,88,2,93,81,25,64,82,34,32,45,14,7,41,99,68,89,35,22,98,5,15,8,52,26,51,91,43,54,95,36,92,85,60,24,23,30,6,53,21,33,13,38,42,80,86,66,78,70,50,100,97,90,46,10,69,29,4,55,40,83,16,71,76,49,75,9,17,28,62;50,15,25,70,66,22,67,19,59,20,44,37,21,12,27,11,49,48,89,81,96,65,80,33,32,72,7,79,53,99,41,46,2,45,91,90,64,61,17,36,95,68,94,82,34,16,71,98,56,10,62,63,26,55,97,92,43,24,30,75,6,47,29,4,74,5,86,51,87,28,100,84,58,83,35,88,57,52,73,69,18,38,76,39,42,77,40,93,8,54,85,13,14,3,23,31,9,1,60,78;47,34,77,2,12,23,25,24,6,40,32,11,94,62,29,73,3,33,56,82,70,95,59,78,99,44,90,96,71,85,18,68,84,67,14,63,76,98,51,79,31,69,93,53,55,22,57,9,41,64,7,37,100,80,74,81,35,20,38,8,61,4,72,39,52,28,49,48,97,36,30,66,88,42,54,5,91,58,21,92,83,46,75,43,27,60,65,16,10,17,50,86,45,19,15,26,87,13,1,89;51,47,80,65,97,32,56,95,92,28,23,24,53,13,35,31,96,1,15,25,30,100,6,34,42,8,18,78,61,41,26,27,7,3,85,29,66,67,79,14,11,73,33,99,93,88,76,40,74,70,17,62,54,90,20,50,4,71,89,46,94,36,83,38,44,87,39,16,9,2,43,68,69,72,59,10,64,81,5,49,77,48,86,82,75,22,98,57,60,63,91,84,58,55,12,45,19,37,21,52;63,91,74,47,38,45,55,100,25,66,28,26,93,12,40,44,72,99,88,60,67,42,21,77,22,62,7,95,16,90,48,84,24,9,43,35,32,33,11,17,61,64,39,56,59,4,68,53,49,89,80,6,14,20,78,79,18,31,83,58,81,1,85,57,34,86,19,51,36,82,23,76,87,13,69,3,41,30,71,92,65,75,96,98,29,46,73,94,27,15,10,70,97,50,2,5,37,8,54,52;9,19,68,88,100,38,36,2,44,97,67,3,81,86,89,55,23,94,95,40,64,29,18,16,39,1,26,66,99,58,65,33,17,91,79,13,69,43,76,59,62,75,84,22,21,31,53,73,34,71,6,37,5,80,77,27,70,25,83,12,45,28,57,24,32,63,82,46,78,60,54,87,90,52,47,85,92,42,51,96,98,41,74,7,93,50,30,72,15,14,10,20,56,61,11,49,4,35,48,8;18,15,65,89,50,33,48,5,19,8,54,78,79,87,3,2,25,74,69,20,84,36,97,4,51,16,40,1,39,71,67,77,43,13,61,93,31,75,66,53,88,22,27,94,86,62,100,60,68,9,64,59,38,45,92,37,80,12,72,21,95,7,82,56,29,70,99,52,34,23,10,47,58,49,44,41,14,83,55,91,85,57,63,30,96,28,24,73,76,90,42,11,46,35,32,6,98,17,26,81;50,7,52,91,47,15,45,100,43,30,56,26,27,62,49,94,58,14,51,28,21,92,93,99,3,53,55,40,77,80,31,68,88,37,20,84,97,39,90,75,96,61,5,98,86,57,42,24,23,48,63,74,29,89,13,19,76,65,69,79,9,95,70,18,66,64,41,22,87,10,81,32,73,59,38,16,85,25,72,35,46,36,12,1,44,83,71,78,82,54,11,6,33,60,2,17,8,67,4,34;49,32,7,72,24,16,66,54,11,64,33,40,34,86,25,99,36,42,62,4,58,94,52,95,22,20,45,26,2,43,75,23,53,93,100,60,65,96,48,82,83,78,71,68,14,88,77,29,50,67,6,74,90,12,10,21,85,97,84,87,73,30,59,70,38,57,91,81,9,79,98,27,17,76,46,92,35,89,37,47,80,44,51,18,55,5,3,28,1,41,8,13,31,56,61,15,39,19,63,69;75,71,46,47,12,65,37,40,43,35,44,9,74,19,68,97,7,2,29,67,64,3,79,42,24,95,93,6,98,28,92,90,69,1,27,53,55,26,72,20,8,4,18,66,57,36,89,63,51,94,91,5,45,41,22,21,54,60,73,25,17,13,87,10,16,77,56,58,49,88,81,31,80,52,11,61,85,96,39,30,70,33,78,48,100,83,84,50,99,14,62,82,32,34,38,86,76,23,15,59;19,42,91,86,80,46,21,68,92,11,85,4,10,90,22,58,52,63,8,65,24,18,59,20,95,34,99,2,13,41,51,37,97,27,100,53,67,12,31,26,14,96,15,29,43,76,74,44,77,93,57,89,72,48,79,39,40,32,1,35,36,83,60,54,17,28,55,49,45,70,69,73,78,56,47,16,71,88,81,25,38,6,62,33,61,75,9,82,84,50,87,94,30,7,98,5,64,23,66,3;47,53,95,12,64,9,43,70,85,17,34,45,60,75,76,40,73,69,6,2,30,15,27,61,71,59,86,19,46,54,32,83,28,37,21,97,42,62,13,79,88,31,22,63,1,48,24,3,74,78,81,38,11,98,39,26,92,90,94,68,58,18,77,93,56,89,57,51,52,82,66,44,99,84,80,100,72,29,36,49,41,91,7,33,55,25,87,50,20,65,8,67,14,96,23,5,35,10,16,4;29,53,62,89,47,2,57,52,13,76,80,96,50,58,3,27,54,35,97,74,1,79,7,51,41,83,67,86,17,84,43,15,32,92,93,19,21,61,24,8,46,39,9,56,11,59,95,40,94,28,25,6,42,10,31,65,91,60,100,73,63,77,23,68,98,75,99,37,49,45,44,90,87,38,14,78,4,48,34,36,26,5,81,82,30,70,72,85,71,69,55,33,66,12,64,16,20,22,88,18;77,50,95,96,94,67,58,45,38,89,49,70,31,21,59,65,6,28,16,36,68,39,84,86,43,37,97,35,9,91,60,15,34,63,78,83,7,55,74,33,20,5,87,66,85,2,52,73,17,12,64,11,14,22,3,88,56,57,80,27,25,100,81,62,24,8,51,4,46,82,23,79,13,54,71,40,1,72,42,44,98,99,93,10,76,75,32,61,92,69,41,30,19,18,29,53,90,26,47,48;100,26,53,85,39,83,62,1,46,89,52,15,50,72,95,38,32,87,66,37,56,76,63,36,69,84,28,21,44,86,55,35,74,18,2,78,42,30,59,31,61,48,71,24,65,94,75,40,14,68,7,51,82,16,43,64,81,17,98,22,79,23,9,4,60,99,12,25,90,27,92,58,20,80,3,91,34,6,8,13,47,11,88,93,41,70,49,54,57,10,73,96,33,45,77,97,5,29,67,19;70,1,97,95,21,91,90,76,46,52,93,72,68,73,24,47,69,25,86,34,17,32,59,11,53,96,50,48,87,71,63,77,100,44,61,45,88,8,85,26,20,15,30,55,64,33,74,36,13,2,12,79,54,67,22,49,31,42,18,80,66,16,41,6,37,78,3,65,5,62,58,83,57,89,60,9,40,28,27,23,29,84,92,19,99,35,39,10,43,98,51,56,38,14,82,4,7,81,94,75];
 
-    % Select training and testing data (you can choose to split your data in a different way if you wish)
-    trainingData = trial(ix(1:80),:);
-    testData = trial(ix(81:end),:);
+%ix_array = zeros(n_different_tests, 100);
+scaling = 7:0.2:9;
+RMSE_array = zeros(1, length(scaling));
 
-    fprintf('Testing the continuous position estimator...')
+for scaling_value = scaling
+    scaling;
+    for test = 1:n_different_tests
+        % Set random number generator
+        %rng(2013);
+        %ix = randperm(length(trial));
+        ix = ix_array(test, :);
 
-    meanSqError = 0;
-    n_predictions = 0;
+        % addpath(teamName);
 
-    figure
-    hold on
-    axis square
-    grid
+        % Select training and testing data (you can choose to split your data in a different way if you wish)
+        trainingData = trial(ix(1:80),:);
+        testData = trial(ix(81:end),:);
 
-    % Train Model
-    modelParameters = positionEstimatorTraining_4(trainingData);
+        fprintf('Testing the continuous position estimator...')
 
-    for tr=1:size(testData,1)
-        display(['Decoding block ',num2str(tr),' out of ',num2str(size(testData,1))]);
-        pause(0.001)
-        for direc=randperm(8) 
-            decodedHandPos = [];
-            times=320:20:size(testData(tr,direc).spikes,2);
-            for t=times
-                past_current_trial.trialId = testData(tr,direc).trialId;
-                past_current_trial.spikes = testData(tr,direc).spikes(:,1:t); 
-                past_current_trial.decodedHandPos = decodedHandPos;
+        meanSqError = 0;
+        n_predictions = 0;
 
-                past_current_trial.startHandPos = testData(tr,direc).handPos(1:2,1); 
+    %     figure
+    %     hold on
+    %     axis square
+    %     grid
 
-                if nargout('positionEstimator_4') == 3
-                    [decodedPosX, decodedPosY, newParameters] = positionEstimator_4(past_current_trial, modelParameters);
-                    modelParameters = newParameters;
-                elseif nargout('positionEstimator_4') == 2
-                    [decodedPosX, decodedPosY] = positionEstimator_4(past_current_trial, modelParameters);
+        % Train Model
+        modelParameters = positionEstimatorTraining_4(trainingData);
+
+        for tr=1:size(testData,1)
+            display(['Decoding block ',num2str(tr),' out of ',num2str(size(testData,1))]);
+            pause(0.001)
+            for direc=randperm(8) 
+                decodedHandPos = [];
+                times=320:20:size(testData(tr,direc).spikes,2);
+                for t=times
+                    past_current_trial.trialId = testData(tr,direc).trialId;
+                    past_current_trial.spikes = testData(tr,direc).spikes(:,1:t); 
+                    past_current_trial.decodedHandPos = decodedHandPos;
+
+                    past_current_trial.startHandPos = testData(tr,direc).handPos(1:2,1); 
+
+                    if nargout('positionEstimator_4') == 3
+                        [decodedPosX, decodedPosY, newParameters] = positionEstimator_4(past_current_trial, modelParameters, scaling_value);
+                        modelParameters = newParameters;
+                    elseif nargout('positionEstimator_4') == 2
+                        [decodedPosX, decodedPosY] = positionEstimator_4(past_current_trial, modelParameters, scaling_value);
+                    end
+
+                    decodedPos = [decodedPosX; decodedPosY];
+                    decodedHandPos = [decodedHandPos decodedPos];
+
+                    meanSqError = meanSqError + norm(testData(tr,direc).handPos(1:2,t) - decodedPos)^2;
+
                 end
-
-                decodedPos = [decodedPosX; decodedPosY];
-                decodedHandPos = [decodedHandPos decodedPos];
-
-                meanSqError = meanSqError + norm(testData(tr,direc).handPos(1:2,t) - decodedPos)^2;
-
+                n_predictions = n_predictions+length(times);
+    %             hold on
+    %             plot(decodedHandPos(1,:),decodedHandPos(2,:), 'r');
+    %             plot(testData(tr,direc).handPos(1,times),testData(tr,direc).handPos(2,times),'b')
             end
-            n_predictions = n_predictions+length(times);
-            hold on
-            plot(decodedHandPos(1,:),decodedHandPos(2,:), 'r');
-            plot(testData(tr,direc).handPos(1,times),testData(tr,direc).handPos(2,times),'b')
         end
+
+        legend('Decoded Position', 'Actual Position')
+
+        RMSE = sqrt(meanSqError/n_predictions);
+        RMSE_vector(1, test) = RMSE;
+
+        %ix_array(test, :) = ix;
+
     end
 
-    legend('Decoded Position', 'Actual Position')
+    average_RMSE = mean(RMSE_vector);
+    fprintf('\nAverage RMSE: %f\n\n', average_RMSE);
 
-    RMSE = sqrt(meanSqError/n_predictions);
-    RMSE_vector(1, test) = RMSE;
+    rmpath(genpath(teamName))
+    RMSE_array(1, test) = average_RMSE;
     
 end
-
-average_RMSE = mean(RMSE_vector);
-fprintf('\nAverage RMSE: %f\n\n', average_RMSE);
-
-rmpath(genpath(teamName))
+RMSE_array
 
 end
