@@ -47,10 +47,10 @@ for test = 1:n_different_tests
 
                 past_current_trial.startHandPos = testData(tr,direc).handPos(1:2,1); 
 
-                if nargout('positionEstimator') == 3
+                if nargout('positionEstimator_4') == 3
                     [decodedPosX, decodedPosY, newParameters] = positionEstimator_4(past_current_trial, modelParameters);
                     modelParameters = newParameters;
-                elseif nargout('positionEstimator') == 2
+                elseif nargout('positionEstimator_4') == 2
                     [decodedPosX, decodedPosY] = positionEstimator_4(past_current_trial, modelParameters);
                 end
 
